@@ -185,7 +185,7 @@ MARKETS = {
     "ixic":   {"name": "那斯達克",       "src": "yf",      "yf_sym": "^IXIC",    "fm_id": None},
     "vix":    {"name": "VIX 恐慌指數",   "src": "yf",      "yf_sym": "^VIX",     "fm_id": None},
     "usdtwd": {"name": "美元／台幣",     "src": "yf",      "yf_sym": "TWD=X",    "fm_id": None},
-    "jpytwd": {"name": "日圓／台幣",     "src": "yf",      "yf_sym": "JPYTWD=X", "fm_id": None},
+    "jpytwd": {"name": "日圓／台幣",     "src": "cross",   "yf_sym": None,       "fm_id": None},
     "gold":   {"name": "黃金",           "src": "yf",      "yf_sym": "GC=F",     "fm_id": None},
     "brent":  {"name": "布蘭特原油",     "src": "yf",      "yf_sym": "BZ=F",     "fm_id": None},
 }
@@ -204,9 +204,64 @@ def dashboard():
     for key, m in MARKETS.items():
         if m["src"] == "yf":
             result[key] = _fetch_yf(m["yf_sym"])
-        else:
+        elif m["src"] == "finmind":
             result[key] = _fetch_finmind_total_return(m["fm_id"])
+        elif m["src"] == "cross" and key == "jpytwd":
+            # Compute JPY/TWD from USD cross rates
+            try:
+                twd = _fetch_yf("TWD=X")
+                jpy = _fetch_yf("USDJPY=X")
+                if twd and jpy and jpy["price"] > 0:
+                    price = round(twd["price"] / jpy["price"], 5)
+                    prev_price = round((twd["price"] - twd["change"]) / (jpy["price"] - jpy["change"]), 5) if jpy["price"] != jpy["change"] else price
+                    chg = round(price - prev_price, 5)
+                    result[key] = {"price": price, "change": chg, "change_pct": round(chg/prev_price*100, 2) if prev_price else 0}
+                else:
+                    result[key] = None
+            except Exception as e:
+                print(f"[jpytwd dashboard] {e}")
+                result[key] = None
     return jsonify({"success": True, "data": result})
+
+
+@cached(ttl=600)
+def _compute_jpytwd_kline(days: int) -> list:
+    """Compute JPY/TWD daily OHLC from USD cross rates."""
+    try:
+        twd_klines = _fetch_yf_kline("TWD=X", days + 30)
+        jpy_klines = _fetch_yf_kline("USDJPY=X", days + 30)
+        if not twd_klines or not jpy_klines:
+            return []
+        twd_d = {d["date"]: d for d in twd_klines}
+        jpy_d = {d["date"]: d for d in jpy_klines}
+        common = sorted(set(twd_d.keys()) & set(jpy_d.keys()))
+        result = []
+        for date in common:
+            t, j = twd_d[date], jpy_d[date]
+            jc = j["c"]
+            if jc <= 0:
+                continue
+            entry = {
+                "date": date,
+                "o": round(t["o"] / jc, 5),
+                "h": round(t["h"] / jc, 5),
+                "l": round(t["l"] / jc, 5),
+                "c": round(t["c"] / jc, 5),
+            }
+            result.append(entry)
+        result = result[-days:]
+        # Compute MAs
+        closes = [d["c"] for d in result]
+        for i, d in enumerate(result):
+            for w, key in [(5, "ma5"), (10, "ma10"), (20, "ma20"), (60, "ma60")]:
+                if i >= w - 1:
+                    d[key] = round(sum(closes[i - w + 1:i + 1]) / w, 5)
+                else:
+                    d[key] = None
+        return result
+    except Exception as e:
+        print(f"[jpytwd kline] {e}")
+        return []
 
 
 @app.route("/api/market_detail")
@@ -223,8 +278,12 @@ def market_detail():
 
     if m["src"] == "yf" and m["yf_sym"]:
         k_data = _fetch_yf_kline(m["yf_sym"], days)
-    else:
+    elif m["src"] == "finmind" and m["fm_id"]:
         k_data = _fetch_finmind_kline(m["fm_id"], days)
+    elif m["src"] == "cross" and market_id == "jpytwd":
+        k_data = _compute_jpytwd_kline(days)
+    else:
+        k_data = []
 
     if not k_data:
         return jsonify({"success": False, "error": "no data"})
@@ -479,17 +538,27 @@ def _get_stock_margin(sid: str, days: int) -> dict:
 @app.route("/api/fx_sparklines")
 @cached(ttl=600)
 def fx_sparklines():
-    symbols = {
-        "usdtwd": "TWD=X",
-        "jpytwd": "JPYTWD=X",
-        "gold":   "GC=F",
-        "brent":  "BZ=F",
-    }
+    direct = {"usdtwd": "TWD=X", "gold": "GC=F", "brent": "BZ=F"}
     result: dict = {}
-    for key, sym in symbols.items():
+    for key, sym in direct.items():
         klines = _fetch_yf_kline(sym, 65)
         if klines:
             result[key] = [k["c"] for k in klines[-60:]]
+
+    # JPY/TWD: compute from USD cross rates (JPYTWD=X often unreliable)
+    try:
+        usd_twd = _fetch_yf_kline("TWD=X", 65)
+        usd_jpy = _fetch_yf_kline("USDJPY=X", 65)
+        if usd_twd and usd_jpy:
+            twd_d = {d["date"]: d["c"] for d in usd_twd}
+            jpy_d = {d["date"]: d["c"] for d in usd_jpy}
+            common = sorted(set(twd_d) & set(jpy_d))
+            cross = [round(twd_d[d] / jpy_d[d], 5) for d in common if jpy_d[d] > 0]
+            if cross:
+                result["jpytwd"] = cross[-60:]
+    except Exception as e:
+        print(f"[jpytwd cross] {e}")
+
     return jsonify({"success": True, "data": result})
 
 
@@ -533,6 +602,30 @@ def run_analyze():
         mimetype="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@app.route("/api/stock_prices")
+def stock_prices():
+    """Batch fetch latest closing price for a list of stock IDs."""
+    ids_str = request.args.get("ids", "")
+    if not ids_str:
+        return jsonify({"success": True, "data": {}})
+    ids = [s.strip() for s in ids_str.split(",") if s.strip()][:20]
+    result: dict = {}
+    today = datetime.today().strftime("%Y-%m-%d")
+    dl = get_dl()
+    for sid in ids:
+        try:
+            df = dl.taiwan_stock_daily(stock_id=sid, start_date=_start(7), end_date=today)
+            if not df.empty:
+                df = df.sort_values("date")
+                result[sid] = {
+                    "price": round(float(df.iloc[-1]["close"]), 2),
+                    "date":  str(df.iloc[-1]["date"])[:10],
+                }
+        except Exception as e:
+            print(f"[stock_prices {sid}] {e}")
+    return jsonify({"success": True, "data": result})
 
 
 @app.route("/api/ticker_sparklines")

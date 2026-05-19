@@ -193,30 +193,52 @@
     }
     .page-back-btn:hover { color:#34d4c0; background:rgba(52,212,192,0.08); }
 
-    /* Nav overlay (full-screen menu) */
-    .nav-overlay {
-      position:fixed; inset:0; z-index:1100;
-      background:rgba(3,5,18,0.96); backdrop-filter:blur(16px);
-      display:none; flex-direction:column; align-items:center; justify-content:center;
-      gap:1.2rem;
+    /* === Left Sidebar Nav === */
+    .sb-backdrop {
+      display:none; position:fixed; inset:0; z-index:190;
+      background:rgba(0,0,0,0.45);
     }
-    .nav-overlay.open { display:flex; }
-    .nav-overlay-close {
-      position:absolute; top:1.2rem; right:1.4rem;
-      background:transparent; border:none; color:#7a85a3; font-size:1.4rem; cursor:pointer;
+    body.sb-open .sb-backdrop { display:block; }
+
+    .sidebar {
+      position:fixed; left:0; top:0; bottom:0; z-index:200; width:220px;
+      background:rgba(5,7,22,0.98); border-right:1px solid rgba(255,255,255,0.09);
+      backdrop-filter:blur(14px); display:flex; flex-direction:column;
+      transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow:4px 0 24px rgba(0,0,0,0.5);
     }
-    .nav-overlay-title { font-size:.65rem; color:#5a6480; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.5rem; }
-    .nav-page-btn {
-      display:flex; align-items:center; gap:1rem;
-      width:280px; padding:1rem 1.4rem; border-radius:16px;
-      border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
-      color:#c8ccde; cursor:pointer; font-size:.9rem; font-weight:600;
-      transition:all .2s; text-align:left;
+    body.sb-open .sidebar { transform:translateX(0); }
+
+    .sb-logo {
+      padding:1rem 1rem .9rem; border-bottom:1px solid rgba(255,255,255,0.07);
+      display:flex; align-items:center; gap:.65rem;
     }
-    .nav-page-btn i { font-size:1.4rem; width:1.6rem; }
-    .nav-page-btn:hover { border-color:rgba(52,212,192,0.4); background:rgba(52,212,192,0.08); color:#34d4c0; }
-    .nav-page-btn.active-page { border-color:rgba(52,212,192,0.5); background:rgba(52,212,192,0.1); color:#34d4c0; }
-    .nav-page-btn small { display:block; font-size:.65rem; color:#5a6480; font-weight:400; margin-top:.15rem; }
+    .sb-logo-icon { color:#34d4c0; font-size:1.1rem; flex-shrink:0; }
+    .sb-logo-text { font-weight:700; font-size:.85rem; color:#f0f2ff; flex:1; }
+    .sb-close-btn {
+      background:transparent; border:none; color:#5a6480; cursor:pointer;
+      font-size:.85rem; padding:.2rem .3rem; border-radius:5px; flex-shrink:0;
+    }
+    .sb-close-btn:hover { color:#c8ccde; }
+    .sb-nav { padding:.7rem .55rem; flex:1; display:flex; flex-direction:column; gap:.15rem; }
+    .sb-item {
+      display:flex; align-items:center; gap:.8rem;
+      width:100%; padding:.65rem .9rem; border-radius:10px;
+      border:1px solid transparent; background:transparent; color:#7a85a3;
+      cursor:pointer; font-size:.82rem; font-weight:600; transition:all .15s; text-align:left;
+    }
+    .sb-item i { font-size:1rem; width:1.1rem; flex-shrink:0; }
+    .sb-item span.sb-sub { font-size:.6rem; color:#3a4260; font-weight:400; display:block; margin-top:.05rem; }
+    .sb-item:hover { background:rgba(255,255,255,0.06); color:#c8ccde; }
+    .sb-item.active { background:rgba(52,212,192,0.12); color:#34d4c0; border-color:rgba(52,212,192,0.22); }
+    .sb-divider { height:1px; background:rgba(255,255,255,0.06); margin:.4rem .9rem; }
+    .sb-footer { padding:.7rem 1rem; font-size:.58rem; color:#2a3050; border-top:1px solid rgba(255,255,255,0.05); }
+
+    /* Push content on wide screens */
+    @media (min-width:1100px) {
+      body.sb-open .app-page { margin-left:220px; transition:margin-left .28s cubic-bezier(.4,0,.2,1); }
+      body.sb-open #mainNav .container-xl { padding-left:240px; }
+    }
 
     /* Full-page journal */
     .jpage-wrap { max-width:1100px; margin:0 auto; }
@@ -233,54 +255,14 @@
     /* Calendar page */
     .cal-search-wrap { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem 1.5rem; margin-bottom:1.5rem; }
 
-    /* === Sidebar === */
+    /* === Hamburger Button === */
     .sidebar-toggle-btn {
-      width:34px; height:34px; border-radius:9px; flex-shrink:0;
+      width:34px; height:34px; border-radius:8px; flex-shrink:0;
       background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
       color:#9aaac8; cursor:pointer; display:flex; align-items:center; justify-content:center;
-      font-size:1.05rem; transition:all .15s;
+      font-size:1.15rem; transition:all .15s;
     }
     .sidebar-toggle-btn:hover { background:rgba(52,212,192,0.14); border-color:rgba(52,212,192,0.4); color:#34d4c0; }
-
-    .sidebar-overlay {
-      position:fixed; inset:0; z-index:1050;
-      background:rgba(2,4,16,0.6); backdrop-filter:blur(4px);
-      opacity:0; pointer-events:none; transition:opacity .28s;
-    }
-    .sidebar-overlay.open { opacity:1; pointer-events:auto; }
-
-    .sidebar {
-      position:fixed; left:0; top:0; bottom:0; z-index:1060; width:360px; max-width:93vw;
-      background:rgba(5,7,22,0.98); border-right:1px solid rgba(255,255,255,0.09);
-      backdrop-filter:blur(20px); box-shadow:10px 0 40px rgba(0,0,0,0.55);
-      transform:translateX(-100%); transition:transform .3s cubic-bezier(.4,0,.2,1);
-      display:flex; flex-direction:column;
-    }
-    .sidebar.open { transform:translateX(0); }
-
-    .sidebar-header {
-      padding:.9rem 1.1rem; border-bottom:1px solid rgba(255,255,255,0.07);
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .sidebar-brand { font-weight:700; font-size:.85rem; color:#34d4c0; letter-spacing:.04em; }
-    .sidebar-close {
-      width:28px; height:28px; border-radius:7px; border:none;
-      background:rgba(255,255,255,0.06); color:#7a85a3; cursor:pointer; font-size:.9rem;
-    }
-    .sidebar-close:hover { color:#f0f2ff; background:rgba(255,255,255,0.11); }
-
-    .sidebar-nav { padding:.5rem .6rem; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; gap:.35rem; }
-    .snav-item {
-      flex:1; padding:.5rem .3rem; border-radius:9px;
-      border:1px solid transparent; background:transparent; color:#7a85a3;
-      cursor:pointer; font-size:.68rem; font-weight:600; transition:all .15s;
-      display:flex; flex-direction:column; align-items:center; gap:.22rem;
-    }
-    .snav-item i { font-size:.95rem; }
-    .snav-item.active { background:rgba(52,212,192,0.11); border-color:rgba(52,212,192,0.3); color:#34d4c0; }
-    .snav-item:hover:not(.active) { background:rgba(255,255,255,0.06); color:#c8ccde; }
-
-    .sidebar-content { flex:1; overflow-y:auto; padding:0 1rem 1.5rem; }
 
     .jnl-title { font-size:.6rem; font-weight:700; color:#5a6480; text-transform:uppercase; letter-spacing:.08em; padding:.75rem 0 .35rem; border-bottom:1px solid rgba(255,255,255,0.06); margin-bottom:.5rem; }
     .journal-form { display:flex; flex-direction:column; gap:.42rem; }
@@ -350,11 +332,16 @@
     .htw-filter:hover:not(.active) { background:rgba(255,255,255,0.09); color:#c8ccde; }
 
     /* === Footer Status Bar === */
-    .sb-item { display:inline-flex; align-items:center; gap:.35rem; }
-    .sb-label { font-size:.65rem; color:#5a6480; }
-    .sb-val   { font-size:.68rem; font-weight:700; font-family:'Space Mono',monospace; }
-    .sb-sep   { color:#2a3050; padding:0 .2rem; }
-    .sb-badge { font-size:.6rem; font-weight:700; padding:.08rem .4rem; border-radius:8px; }
+    .sbar-item { display:inline-flex; align-items:center; gap:.35rem; }
+    .sbar-label { font-size:.65rem; color:#5a6480; }
+    .sbar-val   { font-size:.68rem; font-weight:700; font-family:'Space Mono',monospace; }
+    .sbar-sep   { color:#2a3050; padding:0 .3rem; }
+    .sbar-badge { font-size:.6rem; font-weight:700; padding:.1rem .45rem; border-radius:8px; }
+
+    /* === Market Gauge === */
+    .market-gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:.2rem; }
+    .gauge-label-row { display:flex; justify-content:space-between; width:160px; font-size:.55rem; color:#4a5270; margin-top:.1rem; }
+    .gauge-center-text { text-align:center; margin-top:-.5rem; }
 
     /* === Refresh Button === */
     .refresh-btn {
@@ -413,7 +400,7 @@
   <div class="container-xl d-flex align-items-center gap-2">
     <!-- Sidebar toggle -->
     <button class="sidebar-toggle-btn" id="sidebarToggle" title="功能選單">
-      <i class="bi bi-grid-3x3-gap"></i>
+      <i class="bi bi-list"></i>
     </button>
     <a class="navbar-brand d-flex align-items-center gap-2 me-0 flex-shrink-0" href="#">
       <span class="brand-icon"><i class="bi bi-graph-up-arrow"></i></span>
@@ -426,8 +413,10 @@
       <i class="bi bi-graph-up me-1"></i>本日技術選股
     </button>
 
-    <!-- Search pushed to right -->
-    <div class="ms-auto nav-search-wrap">
+    <!-- Updated time (subtle) -->
+    <span id="lastUpdated" class="ms-auto" style="font-size:.62rem;color:#3a4260;white-space:nowrap;"></span>
+    <!-- Search -->
+    <div class="nav-search-wrap" style="margin-left:.75rem;">
       <i class="bi bi-search nav-search-icon"></i>
       <input type="text" class="nav-search-input" id="stockSearch"
              placeholder="搜尋股票…" autocomplete="off" />
@@ -436,26 +425,36 @@
   </div>
 </nav>
 
-<!-- ══ Navigation Overlay ═══════════════════════════════════════ -->
-<div class="nav-overlay" id="navOverlay">
-  <button class="nav-overlay-close" id="navClose"><i class="bi bi-x-lg"></i></button>
-  <div class="nav-overlay-title">功能選擇</div>
-  <button class="nav-page-btn" data-page="home">
-    <i class="bi bi-house"></i>
-    <div><span>市場儀表板</span><small>指數、外匯、選股總覽</small></div>
-  </button>
-  <button class="nav-page-btn" data-page="journal">
-    <i class="bi bi-journal-bookmark"></i>
-    <div><span>股票記帳表</span><small>交易紀錄、持倉損益</small></div>
-  </button>
-  <button class="nav-page-btn" data-page="calendar">
-    <i class="bi bi-calendar3"></i>
-    <div><span>技術回測日曆</span><small>查看個股指定日期技術面與後續走勢</small></div>
-  </button>
-  <button class="nav-page-btn" data-page="watchlist">
-    <i class="bi bi-star"></i>
-    <div><span>自選股</span><small>即將推出</small></div>
-  </button>
+<!-- ══ Sidebar Backdrop ══════════════════════════════════════════ -->
+<div class="sb-backdrop" id="sbBackdrop"></div>
+
+<!-- ══ Left Sidebar Navigation ══════════════════════════════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <i class="bi bi-graph-up-arrow sb-logo-icon"></i>
+    <span class="sb-logo-text">StockPOC</span>
+    <button class="sb-close-btn" id="sbClose" title="關閉"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <nav class="sb-nav">
+    <button class="sb-item active" data-page="home">
+      <i class="bi bi-house"></i>
+      <div><div>市場儀表板</div><span class="sb-sub">指數 · 外匯 · 商品</span></div>
+    </button>
+    <div class="sb-divider"></div>
+    <button class="sb-item" data-page="journal">
+      <i class="bi bi-journal-bookmark"></i>
+      <div><div>股票記帳表</div><span class="sb-sub">交易紀錄 · 損益</span></div>
+    </button>
+    <button class="sb-item" data-page="calendar">
+      <i class="bi bi-calendar3"></i>
+      <div><div>技術回測日曆</div><span class="sb-sub">歷史指標分析</span></div>
+    </button>
+    <button class="sb-item" data-page="watchlist">
+      <i class="bi bi-star"></i>
+      <div><div>自選股</div><span class="sb-sub">即將推出</span></div>
+    </button>
+  </nav>
+  <div class="sb-footer">StockPOC v4 · FinMind / Yahoo Finance</div>
 </div>
 
 <!-- ══ Page: Dashboard ══════════════════════════════════════════ -->
@@ -466,8 +465,57 @@
   <div class="hero-section mb-4" style="display:flex;align-items:flex-start;gap:1.5rem;flex-wrap:wrap;">
     <div style="flex-shrink:0;min-width:220px;">
       <h1 class="hero-title">市場 <span class="accent">儀表板</span></h1>
-      <p class="hero-sub">點擊指數卡片查看 K 線 · 搜尋個股查看基本面</p>
-      <div id="lastUpdated">— 尚未載入 —</div>
+      <!-- Speedtest 270° Circular Market Gauge -->
+      <div class="market-gauge-wrap mt-2">
+        <svg viewBox="0 0 300 260" width="240" height="208" style="display:block;overflow:visible;">
+          <defs>
+            <filter id="gn" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="gd" x="-400%" y="-400%" width="900%" height="900%">
+              <feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Decorative rings -->
+          <circle cx="150" cy="155" r="130" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <circle cx="150" cy="155" r="120" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="0.5"/>
+          <!-- Background dim arc (270°, lower-left to lower-right clockwise through top) -->
+          <path d="M 72.2 232.8 A 110 110 0 1 1 227.8 232.8" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="18" stroke-linecap="round"/>
+          <!-- Zone segments (clockwise, fear→greed, each 54°) -->
+          <path d="M 72.2 232.8 A 110 110 0 0 1 41.4 137.8" fill="none" stroke="#1144ee" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
+          <path d="M 41.4 137.8 A 110 110 0 0 1 100.1 57.0" fill="none" stroke="#ff4433" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
+          <path d="M 100.1 57.0 A 110 110 0 0 1 199.9 57.0" fill="none" stroke="#ffd040" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
+          <path d="M 199.9 57.0 A 110 110 0 0 1 258.6 137.8" fill="none" stroke="#8ada20" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
+          <path d="M 258.6 137.8 A 110 110 0 0 1 227.8 232.8" fill="none" stroke="#00e870" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
+          <!-- VIX value labels around arc -->
+          <text x="55" y="250" fill="rgba(255,255,255,0.4)" font-size="9" font-family="'Space Mono',monospace" text-anchor="middle">40</text>
+          <text x="28" y="142" fill="rgba(255,255,255,0.3)" font-size="8" font-family="'Space Mono',monospace" text-anchor="middle">34</text>
+          <text x="88" y="38" fill="rgba(255,255,255,0.3)" font-size="8" font-family="'Space Mono',monospace" text-anchor="middle">28</text>
+          <text x="212" y="38" fill="rgba(255,255,255,0.3)" font-size="8" font-family="'Space Mono',monospace" text-anchor="middle">22</text>
+          <text x="272" y="142" fill="rgba(255,255,255,0.3)" font-size="8" font-family="'Space Mono',monospace" text-anchor="middle">16</text>
+          <text x="245" y="250" fill="rgba(255,255,255,0.4)" font-size="9" font-family="'Space Mono',monospace" text-anchor="middle">10</text>
+          <!-- Center circle -->
+          <circle cx="150" cy="155" r="62" fill="rgba(6,9,26,0.85)" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+          <!-- Needle (from center to current position) -->
+          <line id="gaugeNeedle" x1="150" y1="155" x2="150" y2="45" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round" filter="url(#gn)"/>
+          <!-- Center pivot -->
+          <circle cx="150" cy="155" r="7" fill="rgba(255,255,255,0.9)" filter="url(#gn)"/>
+          <circle cx="150" cy="155" r="4" fill="rgba(6,9,26,1)"/>
+          <!-- Glowing dot at needle tip -->
+          <circle id="gaugeDot2" cx="150" cy="45" r="18" fill="rgba(255,200,100,0.08)" filter="url(#gd)"/>
+          <circle id="gaugeDot" cx="150" cy="45" r="8" fill="white" filter="url(#gn)"/>
+          <circle id="gaugeDotCore" cx="150" cy="45" r="4" fill="white"/>
+          <!-- Center numbers -->
+          <text id="gaugeVixNum" x="150" y="147" text-anchor="middle" fill="#f0f2ff" font-family="'Space Mono',monospace" font-size="30" font-weight="700">—</text>
+          <text x="150" y="162" text-anchor="middle" fill="rgba(255,255,255,0.22)" font-family="'Space Mono',monospace" font-size="8">VIX</text>
+          <text id="gaugeSentLabel" x="150" y="178" text-anchor="middle" font-family="'Space Mono',monospace" font-size="11" font-weight="700" fill="#7a85a3">—</text>
+        </svg>
+        <div style="display:flex;justify-content:space-between;width:215px;margin-top:-.5rem;">
+          <span style="font-size:.54rem;color:#1144ee;">恐慌</span>
+          <span style="font-size:.54rem;color:#ffd040;">中性</span>
+          <span style="font-size:.54rem;color:#00e870;">貪婪</span>
+        </div>
+      </div>
     </div>
     <div style="flex:1;min-width:0;align-self:center;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;flex-wrap:wrap;gap:.4rem;">
@@ -632,35 +680,42 @@
       <span style="font-size:.9rem;font-weight:700;color:#34d4c0;"><i class="bi bi-journal-bookmark me-2"></i>股票記帳表</span>
     </div>
   </div>
-  <div class="container-xl py-4">
-    <div class="jpage-wrap">
-      <div class="jpage-grid">
+  <div style="max-width:1200px;margin:0 auto;padding:1.5rem 1rem;">
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start;">
+    <div><!-- LEFT col -->
         <!-- LEFT: Trade Table -->
         <div>
-          <div class="jpage-card mb-3">
-            <div class="jpage-heading">持倉摘要</div>
-            <div id="jpage-positions"><div class="jnl-empty">暫無持倉</div></div>
+          <!-- Positions -->
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:1.2rem;margin-bottom:1rem;">
+            <div style="font-size:.72rem;font-weight:700;color:#9aaac8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;">📊 持倉摘要</div>
+            <div id="jpage-positions" style="color:#c8ccde;font-size:.82rem;"></div>
           </div>
-          <div class="jpage-card">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <div class="jpage-heading" style="margin-bottom:0;border:none;">交易紀錄 <span id="jpage-count" style="color:#3a4260;font-weight:400;"></span></div>
-              <button onclick="if(confirm('確定清空所有交易紀錄？')){_jnl.trades=[];_jnl.save();renderAllJournal();}" style="font-size:.65rem;color:#4a5270;background:transparent;border:none;cursor:pointer;padding:.2rem .5rem;border-radius:5px;" class="page-back-btn">清空</button>
+          <!-- Trade history -->
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:1.2rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;">
+              <span style="font-size:.72rem;font-weight:700;color:#9aaac8;text-transform:uppercase;letter-spacing:.08em;">📋 交易紀錄 <span id="jpage-count" style="color:#5a6480;font-weight:400;font-size:.65rem;"></span></span>
+              <button onclick="if(confirm('確定清空？')){_jnl.trades=[];_jnl.save();renderAllJournal();}" style="font-size:.65rem;color:#ff5f5f;background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.3);border-radius:6px;padding:.2rem .6rem;cursor:pointer;">清空紀錄</button>
             </div>
             <div style="overflow-x:auto;">
-              <table class="jpage-table">
-                <thead><tr>
-                  <th>日期</th><th>操作</th><th>股票</th><th>股數</th>
-                  <th>成交價</th><th>總金額</th><th>手續費</th><th>備注</th><th></th>
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem;">
+                <thead><tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                  <th style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:left;">日期</th>
+                  <th style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:left;">操作</th>
+                  <th style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:left;">股票</th>
+                  <th style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:right;">股數</th>
+                  <th style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:right;">成交價</th>
+                  <th style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:right;">總金額</th>
+                  <th style="padding:.4rem;"></th>
                 </tr></thead>
                 <tbody id="jpage-history"></tbody>
               </table>
             </div>
           </div>
-        </div>
-        <!-- RIGHT: Add Trade Form -->
+        </div><!-- end left col -->
+        <!-- RIGHT: Forms -->
         <div>
-          <div class="jpage-card">
-            <div class="jpage-heading">新增交易</div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:1.2rem;margin-bottom:1rem;">
+            <div style="font-size:.72rem;font-weight:700;color:#9aaac8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;">✚ 新增交易</div>
             <form id="journalFormFull" class="journal-form">
               <div class="jf-row">
                 <div>
@@ -709,15 +764,49 @@
               <button type="submit" class="jf-submit" style="margin-top:.3rem;"><i class="bi bi-plus-lg me-1"></i>新增紀錄</button>
             </form>
           </div>
-          <!-- P&L Summary -->
-          <div class="jpage-card mt-3" id="jpage-pnl-card">
-            <div class="jpage-heading">損益總覽</div>
-            <div id="jpage-pnl"><div class="jnl-empty">無資料</div></div>
+          <!-- Initialize Position -->
+          <div style="background:rgba(255,200,70,0.06);border:1px solid rgba(255,180,50,0.3);border-radius:14px;padding:1.2rem;margin-top:1rem;">
+            <div style="font-size:.72rem;font-weight:700;color:#ffc947;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;">⊞ 初始化持倉 <span style="font-size:.6rem;color:#7a85a3;font-weight:400;text-transform:none;">（直接設定現有持倉成本）</span></div>
+            <form id="journalInitForm" class="journal-form">
+              <div class="jf-row">
+                <div>
+                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">股票代號</label>
+                  <input type="text" class="jf-input" id="jinit-sid" placeholder="如 2330" style="text-transform:uppercase;" autocomplete="off">
+                </div>
+                <div>
+                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">股票名稱</label>
+                  <input type="text" class="jf-input" id="jinit-name" placeholder="自動帶入" readonly>
+                </div>
+              </div>
+              <div class="jf-row">
+                <div>
+                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">持股數量</label>
+                  <input type="number" class="jf-input" id="jinit-shares" placeholder="1000" min="1" step="1">
+                </div>
+                <div>
+                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">平均成本（每股）</label>
+                  <input type="number" class="jf-input" id="jinit-cost" placeholder="0.00" step="0.01">
+                </div>
+              </div>
+              <button type="submit" class="jf-submit" style="background:linear-gradient(135deg,rgba(255,200,70,.15),rgba(255,150,30,.1));border-color:rgba(255,180,50,.4);color:#ffc947;">
+                <i class="bi bi-database me-1"></i>設定初始持倉
+              </button>
+            </form>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          <!-- P&L Summary -->
+          <div style="background:rgba(52,212,192,0.06);border:1px solid rgba(52,212,192,0.2);border-radius:14px;padding:1.2rem;margin-top:1rem;" id="jpage-pnl-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;">
+              <span style="font-size:.72rem;font-weight:700;color:#34d4c0;text-transform:uppercase;letter-spacing:.08em;">💰 損益總覽</span>
+              <button id="updatePricesBtn" style="font-size:.65rem;padding:.25rem .65rem;border-radius:8px;background:rgba(52,212,192,0.1);border:1px solid rgba(52,212,192,0.35);color:#34d4c0;cursor:pointer;">
+                <i class="bi bi-arrow-repeat me-1"></i>更新收盤價
+              </button>
+            </div>
+            <div id="jpage-price-date" style="font-size:.6rem;color:#5a7060;margin-bottom:.5rem;"></div>
+            <div id="jpage-pnl" style="color:#c8ccde;font-size:.8rem;"><div style="color:#5a6480;text-align:center;padding:.8rem;">新增持倉後顯示</div></div>
+          </div>
+        </div><!-- end right col -->
+      </div><!-- end grid -->
+  </div><!-- end wrap -->
 </div><!-- /#page-journal -->
 
 <!-- ══ Page: 技術回測日曆 ════════════════════════════════════════ -->
@@ -795,80 +884,6 @@
     <span style="font-size:.58rem;color:#2a3050;white-space:nowrap;">StockPOC v4</span>
   </div>
 </footer>
-
-<!-- ══ Sidebar Overlay ══════════════════════════════════════════ -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<!-- ══ Sidebar Panel ════════════════════════════════════════════ -->
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <span class="sidebar-brand"><i class="bi bi-grid-3x3-gap me-2"></i>功能列表</span>
-    <button class="sidebar-close" id="sidebarClose"><i class="bi bi-x-lg"></i></button>
-  </div>
-  <div class="sidebar-nav">
-    <button class="snav-item active" data-view="journal">
-      <i class="bi bi-journal-bookmark"></i><span>記帳表</span>
-    </button>
-    <button class="snav-item" data-view="watchlist">
-      <i class="bi bi-star"></i><span>自選股</span>
-    </button>
-    <button class="snav-item" data-view="calendar">
-      <i class="bi bi-calendar3"></i><span>日程</span>
-    </button>
-  </div>
-  <div class="sidebar-content">
-
-    <!-- ── 股票記帳表 ──────────────────────────────────────── -->
-    <div id="view-journal">
-      <div class="jnl-title">持倉摘要</div>
-      <div id="journal-positions"><div class="jnl-empty">暫無持倉，請新增交易紀錄</div></div>
-
-      <div class="jnl-title">新增交易</div>
-      <form id="journalForm" class="journal-form">
-        <div class="jf-row">
-          <input type="date" class="jf-input" id="jf-date">
-          <select class="jf-input" id="jf-action">
-            <option value="buy">買進</option>
-            <option value="sell">賣出</option>
-          </select>
-        </div>
-        <div class="jf-row">
-          <input type="text" class="jf-input" id="jf-sid" placeholder="股票代號" style="text-transform:uppercase;" autocomplete="off">
-          <input type="text" class="jf-input" id="jf-name" placeholder="名稱（自動）" readonly>
-        </div>
-        <div class="jf-row">
-          <input type="number" class="jf-input" id="jf-qty" placeholder="股數" min="1" step="1">
-          <input type="number" class="jf-input" id="jf-price" placeholder="成交價" step="0.01">
-        </div>
-        <div class="jf-row">
-          <input type="number" class="jf-input" id="jf-fee" placeholder="手續費" value="0" min="0">
-          <input type="text" class="jf-input" id="jf-memo" placeholder="備注">
-        </div>
-        <button type="submit" class="jf-submit"><i class="bi bi-plus-lg me-1"></i>新增紀錄</button>
-      </form>
-
-      <div class="jnl-title">交易紀錄 <span id="jnl-count" style="color:#3a4260;font-weight:400;"></span></div>
-      <div id="journal-history"><div class="jnl-empty">無交易紀錄</div></div>
-    </div>
-
-    <!-- ── 自選股（即將推出）────────────────────────────────── -->
-    <div id="view-watchlist" style="display:none;">
-      <div class="jnl-empty" style="padding-top:4rem;">
-        <i class="bi bi-star" style="font-size:2.2rem;color:#3a4260;display:block;margin-bottom:.8rem;"></i>
-        自選股管理功能即將推出
-      </div>
-    </div>
-
-    <!-- ── 財報日程（即將推出）────────────────────────────────── -->
-    <div id="view-calendar" style="display:none;">
-      <div class="jnl-empty" style="padding-top:4rem;">
-        <i class="bi bi-calendar3" style="font-size:2.2rem;color:#3a4260;display:block;margin-bottom:.8rem;"></i>
-        財報 / 重大事件日程即將推出
-      </div>
-    </div>
-
-  </div>
-</div>
 
 <!-- ══ Analyze Progress Overlay ════════════════════════════════ -->
 <div id="analyzeOverlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(4,6,20,0.88);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
@@ -1375,15 +1390,42 @@ function loadFxSparklines() {
 }
 loadFxSparklines();
 
+/* ── Market Temperature Gauge ─────────────────────────────────── */
+function updateMarketGauge(vix, sentimentLabel, sentimentColor) {
+  // 270° gauge: VIX40=lower-left(α=135°), VIX25=top(α=270°), VIX10=lower-right(α=45°)
+  // α = 135 + ((40−VIX)/30)×270 → SVG coords: x=cx+r·cos(α), y=cy+r·sin(α)
+  const clamped = Math.max(10, Math.min(40, vix));
+  const alphaDeg = 135 + ((40 - clamped) / 30) * 270;
+  const alphaRad = alphaDeg * Math.PI / 180;
+  const cx = 150, cy = 155;
+  const nx = cx + 95 * Math.cos(alphaRad),  ny = cy + 95 * Math.sin(alphaRad);
+  const dx = cx + 110 * Math.cos(alphaRad), dy = cy + 110 * Math.sin(alphaRad);
+  const needle = document.getElementById('gaugeNeedle');
+  if (needle) { needle.setAttribute('x2', nx.toFixed(1)); needle.setAttribute('y2', ny.toFixed(1)); }
+  ['gaugeDot','gaugeDot2','gaugeDotCore'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) { el.setAttribute('cx', dx.toFixed(1)); el.setAttribute('cy', dy.toFixed(1)); }
+  });
+  const col = sentimentColor || '#ffffff';
+  const dot = document.getElementById('gaugeDot');
+  const dotC = document.getElementById('gaugeDotCore');
+  if (dot) dot.setAttribute('fill', col);
+  if (dotC) dotC.setAttribute('fill', col);
+  const numEl = document.getElementById('gaugeVixNum');
+  const lblEl = document.getElementById('gaugeSentLabel');
+  if (numEl) { numEl.textContent = vix.toFixed(1); numEl.setAttribute('fill', '#f0f2ff'); }
+  if (lblEl) { lblEl.textContent = sentimentLabel || ''; lblEl.setAttribute('fill', col); }
+}
+
 /* ── Market Status Bar ───────────────────────────────────────── */
 function updateStatusBar(data) {
   const items = [];
   const mkItem = function(label, val, color, badge) {
-    return '<span class="sb-item">'
-      + '<span class="sb-label">'+label+'</span>'
-      + '<span class="sb-val" style="color:'+color+'">'+val+'</span>'
-      + (badge ? '<span class="sb-badge" style="color:'+color+';background:'+_hex2rgba(color,0.14)+';border:1px solid '+_hex2rgba(color,0.35)+'">'+badge+'</span>' : '')
-      + '</span><span class="sb-sep">·</span>';
+    return '<span class="sbar-item">'
+      + '<span class="sbar-label">'+label+'</span>'
+      + '<span class="sbar-val" style="color:'+color+'">'+val+'</span>'
+      + (badge ? '<span class="sbar-badge" style="color:'+color+';background:'+_hex2rgba(color,0.14)+';border:1px solid '+_hex2rgba(color,0.35)+'">'+badge+'</span>' : '')
+      + '</span><span class="sbar-sep">·</span>';
   };
 
   if (data.vix) {
@@ -1408,7 +1450,7 @@ function updateStatusBar(data) {
     items.push(mkItem('USD/TWD', data.usdtwd.price.toFixed(3), col, c>0?'美元強':'美元弱'));
   }
   // Key watch note
-  items.push('<span class="sb-item" style="color:#4a5270;font-size:.62rem;">⊡ 觀察重點：VIX&lt;20 留意急漲後回測 · USD/TWD 匯率影響台股外資動向</span>');
+  items.push('<span class="sbar-item" style="color:#3a4260;font-size:.62rem;">⊡ VIX&lt;20 留意急漲後回測 · 匯率影響外資動向</span>');
 
   document.getElementById('statusBarContent').innerHTML = items.join('');
 }
@@ -1427,6 +1469,7 @@ function loadDashboard() {
         $('#vixChange').removeClass('up dn flat').addClass(cls)
           .html(`${arr} ${fmt(Math.abs(d.change),2)} (${Math.abs(d.change_pct).toFixed(2)}%)`);
         $('#vixBadge').text(z.label).css('color',z.tc);
+        updateMarketGauge(d.price, z.label, z.tc);
       } else { fillCard(id, res.data[id]); }
     });
     $('#lastUpdated').text('更新時間：'+new Date().toLocaleTimeString('zh-TW'));
@@ -1818,9 +1861,11 @@ $('#aiRecommendBtn').on('click',function(){
                 <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                   <span style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:${cat.color};">${r.stock_id}</span>
                   <span style="font-size:.88rem;font-weight:600;color:#f0f2ff;">${r.name||''}</span>
-                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:.8rem;" class="ic-change ${chgCls}">${chgArr} ${Math.abs(r.change_pct||0).toFixed(2)}%</span>
                 </div>
-                <div style="font-family:'Space Mono',monospace;font-size:.95rem;color:#f0f2ff;margin-bottom:.4rem;">${r.price!=null?r.price:'—'}</div>
+                <div style="display:flex;align-items:baseline;gap:.6rem;margin-bottom:.4rem;">
+                  <span style="font-family:'Space Mono',monospace;font-size:1.35rem;font-weight:700;color:#f0f2ff;letter-spacing:.01em;">${r.price!=null?Number(r.price).toLocaleString('en-US'):'—'}</span>
+                  <span class="ic-change ${chgCls}" style="font-size:.82rem;">${chgArr} ${Math.abs(r.change_pct||0).toFixed(2)}%</span>
+                </div>
                 <div style="line-height:1.8;margin-bottom:.3rem;">${themeHtml} ${sigHtml}</div>
                 ${rptHtml?`
                 <button class="report-btn" data-rpt="${uid}">詳細報告 ▾</button>
@@ -2033,55 +2078,65 @@ $('#analyzeCloseBtn').on('click',function(){
   $('#analyzeOverlay').hide();
 });
 
-/* ── Page Navigation ──────────────────────────────────────────── */
+/* ── Sidebar & Page Navigation ────────────────────────────────── */
+function toggleSidebar(force) {
+  const open = force !== undefined ? force : !document.body.classList.contains('sb-open');
+  document.body.classList.toggle('sb-open', open);
+}
+
+$('#sidebarToggle').on('click', () => toggleSidebar());
+$('#sbClose, #sbBackdrop').on('click', () => toggleSidebar(false));
+
 function navigateTo(pageId) {
   $('.app-page').removeClass('active');
   $('#page-'+pageId).addClass('active');
-  $('#navOverlay').removeClass('open');
-  document.body.style.overflow = '';
-  // Update nav button styles
-  $('.nav-page-btn').removeClass('active-page');
-  $(`.nav-page-btn[data-page="${pageId}"]`).addClass('active-page');
+  // Update sidebar items
+  $('.sb-item').removeClass('active');
+  $(`.sb-item[data-page="${pageId}"]`).addClass('active');
+  // Close sidebar on mobile
+  if (window.innerWidth < 1100) toggleSidebar(false);
   // Resize charts if returning to home
-  if (pageId === 'home') {
-    setTimeout(function(){
-      try { Plotly.Plots.resize('vixRiverChart'); } catch(e) {}
-    }, 50);
-  }
-  // Init calendar chart if going there
-  if (pageId === 'calendar') {
-    $('#cal-date').val(new Date(Date.now()-90*864e5).toISOString().slice(0,10));
-  }
-  // Sync journal views
+  if (pageId === 'home') setTimeout(function(){ try{Plotly.Plots.resize('vixRiverChart');}catch(e){} },100);
+  if (pageId === 'calendar') $('#cal-date').val(new Date(Date.now()-90*864e5).toISOString().slice(0,10));
   if (pageId === 'journal') renderAllJournal();
 }
-
-$('#sidebarToggle').on('click', function(){
-  $('#navOverlay').addClass('open');
-  document.body.style.overflow = 'hidden';
-});
-$('#navClose').on('click', function(){
-  $('#navOverlay').removeClass('open');
-  document.body.style.overflow = '';
-});
-$(document).on('click', '.nav-page-btn', function(){
-  navigateTo($(this).data('page'));
-});
-$(document).on('click', '.page-back-btn', function(){
-  navigateTo($(this).data('page') || 'home');
-});
+$(document).on('click', '.sb-item', function(){ navigateTo($(this).data('page')); });
+$(document).on('click', '.page-back-btn', function(){ navigateTo($(this).data('page')||'home'); });
 
 /* ── Stock Journal ────────────────────────────────────────────── */
 const _jnl = {
   _key: 'spoc-journal-v1',
+  _initKey: 'spoc-journal-init-v1',
+  _priceKey: 'spoc-journal-prices-v1',
   trades: [],
-  load() { this.trades = JSON.parse(localStorage.getItem(this._key) || '[]'); return this; },
-  save() { localStorage.setItem(this._key, JSON.stringify(this.trades)); },
+  initPos: [],   // [{sid, name, shares, avgCost, date}]
+  prices: {},    // {sid: {price, date}}
+  load() {
+    this.trades  = JSON.parse(localStorage.getItem(this._key)    || '[]');
+    this.initPos = JSON.parse(localStorage.getItem(this._initKey)|| '[]');
+    this.prices  = JSON.parse(localStorage.getItem(this._priceKey)||'{}');
+    return this;
+  },
+  save() { localStorage.setItem(this._key,    JSON.stringify(this.trades)); },
+  saveInit() { localStorage.setItem(this._initKey, JSON.stringify(this.initPos)); },
+  savePrices() { localStorage.setItem(this._priceKey, JSON.stringify(this.prices)); },
   add(t) { t.id = Date.now(); this.trades.unshift(t); this.save(); },
   del(id) { this.trades = this.trades.filter(t => t.id !== id); this.save(); },
+  setInit(sid, name, shares, avgCost, date) {
+    const idx = this.initPos.findIndex(p => p.sid === sid);
+    const entry = {sid, name, shares, avgCost, date};
+    if (idx >= 0) this.initPos[idx] = entry; else this.initPos.push(entry);
+    this.saveInit();
+  },
+  delInit(sid) { this.initPos = this.initPos.filter(p => p.sid !== sid); this.saveInit(); },
   positions() {
     const pos = {};
-    [...this.trades].reverse().forEach(t => {
+    // Seed from initial positions
+    this.initPos.forEach(function(ip) {
+      pos[ip.sid] = {sid:ip.sid, name:ip.name, shares:ip.shares, cost:ip.avgCost*ip.shares, realized:0, fromInit:true};
+    });
+    // Apply trades (oldest first)
+    [...this.trades].reverse().forEach(function(t) {
       if (!pos[t.sid]) pos[t.sid] = {sid:t.sid, name:t.name, shares:0, cost:0, realized:0};
       const p = pos[t.sid];
       if (t.action === 'buy') {
@@ -2098,26 +2153,33 @@ const _jnl = {
   }
 }.load();
 
-function renderAllJournal() { renderJournal(); renderJournalPage(); }
+function renderAllJournal() { renderJournalPage(); }
 
 function renderJournalPage() {
+  if (!document.getElementById('jpage-positions')) return; // page not mounted
   const holdings = _jnl.positions().filter(p => p.shares > 0);
   // Full-page positions
   const posEl = document.getElementById('jpage-positions');
   if (posEl) {
     if (!holdings.length) {
-      posEl.innerHTML = '<div class="jnl-empty">暫無持倉</div>';
+      posEl.innerHTML = '<div style="color:#7a85a3;text-align:center;padding:1rem;">暫無持倉 — 請先「初始化持倉」或「新增交易」</div>';
     } else {
-      posEl.innerHTML = '<table class="jpage-table"><thead><tr><th>代號</th><th>名稱</th><th>持股</th><th>均成本</th><th>投入(K)</th><th>已實現損益</th></tr></thead><tbody>'
+      const TH = 'style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:left;font-size:.7rem;border-bottom:1px solid rgba(255,255,255,0.1);"';
+      posEl.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr>'
+        +'<th '+TH+'>代號</th><th '+TH+'>名稱</th><th '+TH+' style="text-align:right;">持股</th>'
+        +'<th '+TH+' style="text-align:right;">均成本</th><th '+TH+' style="text-align:right;">投入</th>'
+        +'<th '+TH+' style="text-align:right;">已實現</th>'
+        +'</tr></thead><tbody>'
         + holdings.map(p => {
           const avg = (p.cost/p.shares).toFixed(2);
           const totalK = (p.cost/1000).toFixed(1);
           const rlzK = (p.realized/1000).toFixed(2);
           const rlzColor = p.realized>0?'#5cd98a':p.realized<0?'#ff5f5f':'#7a85a3';
-          return `<tr><td style="font-family:'Space Mono',monospace;color:#34d4c0;font-weight:700;">${p.sid}</td>
-            <td>${p.name}</td><td>${p.shares.toLocaleString()}</td>
-            <td>${avg}</td><td>${totalK}K</td>
-            <td style="color:${rlzColor};font-weight:700;">${p.realized!==0?(p.realized>0?'+':'')+rlzK+'K':'—'}</td></tr>`;
+          const TD = 'style="padding:.45rem .5rem;border-bottom:1px solid rgba(255,255,255,0.06);color:#c8ccde;font-size:.76rem;"';
+          return `<tr><td ${TD} style="font-family:'Space Mono',monospace;color:#34d4c0;font-weight:700;">${p.sid}</td>
+            <td ${TD}>${p.name}</td><td ${TD} style="text-align:right;">${p.shares.toLocaleString()}</td>
+            <td ${TD} style="text-align:right;">${avg}</td><td ${TD} style="text-align:right;">${totalK}K</td>
+            <td ${TD} style="text-align:right;color:${rlzColor};font-weight:700;">${p.realized!==0?(p.realized>0?'+':'')+rlzK+'K':'—'}</td></tr>`;
         }).join('')
         + '</tbody></table>';
     }
@@ -2127,43 +2189,85 @@ function renderJournalPage() {
   const countEl = document.getElementById('jpage-count');
   if (countEl) countEl.textContent = _jnl.trades.length ? `(${_jnl.trades.length})` : '';
   if (histEl) {
+    const TD2 = 'style="padding:.42rem .5rem;border-bottom:1px solid rgba(255,255,255,0.05);color:#c8ccde;font-size:.74rem;"';
     histEl.innerHTML = _jnl.trades.map(t => {
       const total = (t.price * t.qty).toLocaleString('en-US', {maximumFractionDigits:0});
       return `<tr>
-        <td style="white-space:nowrap;color:#7a85a3;">${t.date}</td>
-        <td><span style="color:${t.action==='buy'?'#5cd98a':'#ff5f5f'};font-weight:700;">${t.action==='buy'?'買進':'賣出'}</span></td>
-        <td style="font-family:'Space Mono',monospace;">${t.sid} <span style="color:#7a85a3;">${t.name}</span></td>
-        <td>${t.qty.toLocaleString()}</td>
-        <td>$${t.price}</td>
-        <td>$${total}</td>
-        <td style="color:#7a85a3;">${t.fee||0}</td>
-        <td style="color:#5a6480;">${t.note||'—'}</td>
-        <td><span class="jh-del" data-jid="${t.id}" title="刪除">✕</span></td>
+        <td ${TD2} style="white-space:nowrap;color:#7a85a3;">${t.date.slice(5)}</td>
+        <td ${TD2}><span style="color:${t.action==='buy'?'#5cd98a':'#ff5f5f'};font-weight:700;">${t.action==='buy'?'買':'賣'}</span></td>
+        <td ${TD2} style="font-family:'Space Mono',monospace;">${t.sid} <span style="color:#7a85a3;">${t.name}</span></td>
+        <td ${TD2} style="text-align:right;">${t.qty.toLocaleString()}</td>
+        <td ${TD2} style="text-align:right;">$${t.price}</td>
+        <td ${TD2} style="text-align:right;">$${total}</td>
+        <td ${TD2} style="text-align:center;"><span class="jh-del" data-jid="${t.id}" style="cursor:pointer;color:#ff5f5f;padding:.1rem .3rem;">✕</span></td>
       </tr>`;
     }).join('');
   }
-  // P&L summary
+  // P&L summary with unrealized gain
   const pnlEl = document.getElementById('jpage-pnl');
+  const priceDateEl = document.getElementById('jpage-price-date');
   if (pnlEl) {
-    const totalInvested = holdings.reduce((s,p)=>s+p.cost, 0);
-    const totalRealized = _jnl.positions().reduce((s,p)=>s+p.realized, 0);
-    const totalTrades = _jnl.trades.length;
-    if (!totalTrades) { pnlEl.innerHTML='<div class="jnl-empty">無資料</div>'; return; }
+    const allPos = _jnl.positions();
+    const totalInvested = holdings.reduce(function(s,p){ return s+p.cost; }, 0);
+    const totalRealized = allPos.reduce(function(s,p){ return s+p.realized; }, 0);
+    const priceEntries = Object.entries(_jnl.prices);
+    if (priceDateEl && priceEntries.length) {
+      const dates = priceEntries.map(function(e){ return e[1].date; }).filter(Boolean);
+      priceDateEl.textContent = '收盤價日期：' + (dates.sort().pop() || '—');
+    }
+    // Unrealized P&L
+    let totalUnreal = 0, totalMktVal = 0;
+    holdings.forEach(function(p) {
+      const priceInfo = _jnl.prices[p.sid];
+      if (priceInfo && priceInfo.price && p.shares > 0) {
+        const mktVal = priceInfo.price * p.shares;
+        totalMktVal += mktVal;
+        totalUnreal += mktVal - p.cost;
+      }
+    });
+    const hasPrice = totalMktVal > 0;
     const rows = [
-      ['投入資金', `$${(totalInvested/1000).toFixed(1)}K`, '#f0f2ff'],
-      ['已實現損益', `${totalRealized>=0?'+':''}$${(totalRealized/1000).toFixed(2)}K`, totalRealized>=0?'#5cd98a':'#ff5f5f'],
-      ['交易筆數', `${totalTrades} 筆`, '#c8ccde'],
-    ];
-    pnlEl.innerHTML = rows.map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-      <span style="font-size:.73rem;color:#7a85a3;">${l}</span>
-      <span style="font-size:.8rem;font-weight:700;color:${c};">${v}</span></div>`).join('');
+      ['持倉成本', '$'+(totalInvested/1000).toFixed(1)+'K', '#f0f2ff'],
+      hasPrice ? ['持倉市值', '$'+(totalMktVal/1000).toFixed(1)+'K', '#f0f2ff'] : null,
+      hasPrice ? ['未實現損益', (totalUnreal>=0?'+':'')+'$'+(totalUnreal/1000).toFixed(2)+'K'
+                  +' ('+(totalInvested>0?(totalUnreal/totalInvested*100).toFixed(2):'—')+'%)',
+                  totalUnreal>=0?'#5cd98a':'#ff5f5f'] : null,
+      totalRealized !== 0 ? ['已實現損益', (totalRealized>=0?'+':'')+'$'+(totalRealized/1000).toFixed(2)+'K', totalRealized>=0?'#5cd98a':'#ff5f5f'] : null,
+      ['交易筆數', (_jnl.trades.length+_jnl.initPos.length)+' 筆（含初始）', '#7a85a3'],
+    ].filter(Boolean);
+    pnlEl.innerHTML = rows.map(function(r){
+      return '<div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+        +'<span style="font-size:.73rem;color:#7a85a3;">'+r[0]+'</span>'
+        +'<span style="font-size:.8rem;font-weight:700;color:'+r[2]+';">'+r[1]+'</span></div>';
+    }).join('');
+    // Per-position return table
+    if (hasPrice) {
+      let perPosHtml = '<div style="margin-top:.7rem;border-top:1px solid rgba(255,255,255,0.06);padding-top:.6rem;">'
+        +'<div style="font-size:.6rem;color:#5a6480;margin-bottom:.4rem;">各股損益</div>';
+      holdings.forEach(function(p) {
+        const priceInfo = _jnl.prices[p.sid];
+        if (!priceInfo || !p.shares) return;
+        const cp = priceInfo.price;
+        const avgCost = p.cost / p.shares;
+        const unreal = (cp - avgCost) * p.shares;
+        const ret = ((cp - avgCost) / avgCost * 100);
+        const col = ret >= 0 ? '#5cd98a' : '#ff5f5f';
+        perPosHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,0.04);">'
+          +'<span style="font-family:\'Space Mono\',monospace;font-size:.72rem;color:#34d4c0;">'+p.sid+'</span>'
+          +'<span style="font-size:.7rem;color:#c8ccde;">均'+avgCost.toFixed(2)+' → 現'+cp+'</span>'
+          +'<span style="font-size:.72rem;font-weight:700;color:'+col+';">'+(ret>=0?'+':'')+ret.toFixed(2)+'%</span>'
+          +'</div>';
+      });
+      pnlEl.innerHTML += perPosHtml + '</div>';
+    }
   }
 }
 
 function renderJournal() {
-  // Positions (sidebar / compact view)
+  // Compact view (legacy sidebar, now unused — full page is renderJournalPage)
   const holdings = _jnl.positions().filter(p => p.shares > 0);
   const posEl = document.getElementById('journal-positions');
+  if (!posEl) return; // sidebar removed, skip gracefully
   if (!holdings.length) {
     posEl.innerHTML = '<div class="jnl-empty">暫無持倉</div>';
   } else {
@@ -2184,6 +2288,7 @@ function renderJournal() {
   }
   // History
   const histEl = document.getElementById('journal-history');
+  if (!histEl) return;
   const total = _jnl.trades.length;
   $('#jnl-count').text(total ? `(${total})` : '');
   if (!total) {
@@ -2248,6 +2353,54 @@ $('#jf2-qty, #jf2-price, #jf2-fee').on('input', function(){
     prev.style.display='block';
     prev.textContent=`總金額 $${total.toLocaleString()} + 手續費 $${fee} = 合計 $${net.toLocaleString()}`;
   } else { prev.style.display='none'; }
+});
+
+// Initialize position form
+$(document).on('submit', '#journalInitForm', function(e){
+  e.preventDefault();
+  const sid=$('#jinit-sid').val().trim().toUpperCase();
+  const name=$('#jinit-name').val().trim()||sid;
+  const shares=parseInt($('#jinit-shares').val());
+  const cost=parseFloat($('#jinit-cost').val());
+  const date=new Date().toISOString().slice(0,10);
+  if(!sid||!shares||!cost||isNaN(shares)||isNaN(cost)) return;
+  _jnl.setInit(sid, name, shares, cost, date);
+  renderAllJournal();
+  $('#jinit-shares,#jinit-cost').val('');
+  alert('✓ 初始持倉已設定：'+sid+' '+shares+'股 @ '+cost);
+});
+
+// Auto-fill name for init form
+let _jiTimer;
+$('#jinit-sid').on('input', function(){
+  clearTimeout(_jiTimer);
+  const q=$(this).val().trim();
+  if(q.length<3){$('#jinit-name').val('');return;}
+  _jiTimer=setTimeout(function(){
+    $.get('/api/stock_search?q='+q, function(res){
+      if(res.success&&res.results.length){
+        const r=res.results.find(x=>x.stock_id===q.toUpperCase())||res.results[0];
+        $('#jinit-name').val(r.stock_name);
+      }
+    });
+  },400);
+});
+
+// Update closing prices button
+$('#updatePricesBtn').on('click', function(){
+  const holdings = _jnl.positions().filter(function(p){ return p.shares>0; });
+  if(!holdings.length){ alert('尚無持倉'); return; }
+  const ids = holdings.map(function(p){ return p.sid; }).join(',');
+  $(this).prop('disabled',true).html('<span class="spinner-ring" style="width:10px;height:10px;border-width:2px;"></span> 更新中…');
+  $.get('/api/stock_prices?ids='+ids, function(res){
+    $('#updatePricesBtn').prop('disabled',false).html('<i class="bi bi-arrow-repeat me-1"></i>更新收盤價');
+    if(!res.success) return;
+    Object.assign(_jnl.prices, res.data);
+    _jnl.savePrices();
+    renderAllJournal();
+  }).fail(function(){
+    $('#updatePricesBtn').prop('disabled',false).html('<i class="bi bi-arrow-repeat me-1"></i>更新收盤價');
+  });
 });
 
 // Full-page stock search
