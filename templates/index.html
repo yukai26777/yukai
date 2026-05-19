@@ -2,6 +2,16 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <script>
+  // 強制載入最新版本：如果 URL 版本號不符就重定向
+  (function(){
+    var v = new URLSearchParams(location.search).get('v');
+    if(v !== '{{app_ver}}') location.replace('/?v={{app_ver}}');
+  })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>台股市場儀表板</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -927,8 +937,19 @@
         <div style="font-size:.8rem;font-weight:700;color:#f0f2ff;" id="cal-chart-title"></div>
         <div style="font-size:.68rem;color:#7a85a3;" id="cal-chart-sub"></div>
       </div>
-      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;">
-        <div id="calChartContainer" style="height:680px;"></div>
+      <!-- K 線面板 -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:.75rem;">
+        <div id="calChartKline" style="height:400px;"></div>
+      </div>
+      <!-- MACD 面板 -->
+      <div style="margin-top:6px;background:rgba(232,121,249,0.04);border:1px solid rgba(232,121,249,0.25);border-radius:10px;padding:.5rem .75rem;">
+        <div style="font-size:.75rem;font-weight:700;color:#e879f9;font-family:'Space Mono',monospace;margin-bottom:2px;">MACD(12,26,9) &nbsp;<span style="font-weight:400;font-size:.65rem;opacity:.7;">─ DIF &nbsp;╌ DEA</span></div>
+        <div id="calChartMacd" style="height:120px;"></div>
+      </div>
+      <!-- KD 面板 -->
+      <div style="margin-top:6px;background:rgba(34,211,238,0.04);border:1px solid rgba(34,211,238,0.25);border-radius:10px;padding:.5rem .75rem;">
+        <div style="font-size:.75rem;font-weight:700;color:#22d3ee;font-family:'Space Mono',monospace;margin-bottom:2px;">KD(9) &nbsp;<span style="font-weight:400;font-size:.65rem;opacity:.7;">─ K值 &nbsp;╌ D值</span></div>
+        <div id="calChartKd" style="height:120px;"></div>
       </div>
       <!-- K-bar click info -->
       <div id="cal-kbar-info" style="display:none;padding:.45rem 1rem;margin-top:.5rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,200,80,0.25);border-radius:10px;font-size:.78rem;color:#c8ccde;font-family:'Space Mono',monospace;"></div>
@@ -1301,14 +1322,14 @@ function renderStockCombined(cid, kd, instData, accent) {
   const hasMacd = kd.some(d => d.macd != null);
   const hasKd   = kd.some(d => d.k != null);
 
-  // Panel domains — order: K-line / MACD / KD / 三大法人 (bottom)
+  // Panel domains — 面板之間保留 7% gap，確保視覺完全分離
   let kDom, instDom, macdDom, kdDom;
   if (hasMacd && hasKd && hasInst) {
-    kDom=[0.50,1.0]; macdDom=[0.34,0.47]; kdDom=[0.18,0.31]; instDom=[0.0,0.14];
+    kDom=[0.52,1.0]; macdDom=[0.35,0.47]; kdDom=[0.20,0.31]; instDom=[0.03,0.15];
   } else if (hasMacd && hasKd) {
-    kDom=[0.56,1.0]; macdDom=[0.29,0.52]; kdDom=[0.02,0.25];
+    kDom=[0.54,1.0]; macdDom=[0.29,0.47]; kdDom=[0.04,0.22];
   } else if (hasInst) {
-    kDom=[0.36,1.0]; instDom=[0.0,0.30];
+    kDom=[0.38,1.0]; instDom=[0.0,0.32];
   } else {
     kDom=[0.0,1.0];
   }
@@ -1379,30 +1400,33 @@ function renderStockCombined(cid, kd, instData, accent) {
     shapes.push({type:'rect',xref:'paper',yref:'paper',x0:0,x1:1,y0:dom[0],y1:dom[1],
                  fillcolor:color,line:{width:0},layer:'below'});
   };
-  if(hasMacd&&macdDom) addPanelBg(macdDom,'rgba(0,0,0,0.12)');
-  if(hasKd&&kdDom)     addPanelBg(kdDom,  'rgba(0,0,0,0.18)');
-  if(hasInst&&instDom) addPanelBg(instDom,'rgba(0,0,0,0.12)');
+  if(hasMacd&&macdDom) addPanelBg(macdDom,'rgba(232,121,249,0.04)');  // 粉紫色底：MACD
+  if(hasKd&&kdDom)     addPanelBg(kdDom,  'rgba(34,211,238,0.04)');   // 青色底：KD
+  if(hasInst&&instDom) addPanelBg(instDom,'rgba(91,180,255,0.04)');
 
-  // Visible separator line + prominent panel title
-  const addDiv=(y, label, color)=>{
-    shapes.push({type:'line',xref:'paper',yref:'paper',x0:0,x1:1,y0:y,y1:y,
-                 line:{color:'rgba(255,255,255,0.22)',width:1.5}});
-    anns.push({xref:'paper',yref:'paper',x:1,y:y-0.004,text:label,
-               showarrow:false,
-               font:{size:9,color:color||'rgba(200,204,222,0.75)',family:"'Space Mono',monospace"},
-               xanchor:'right',yanchor:'top',
-               bgcolor:'rgba(4,6,20,0.55)',borderpad:3});
+  // 面板分隔：在 gap 的中央畫一條明顯實線 + 面板標題
+  const addDiv=(panelBottom, panelTop, label, color)=>{
+    const mid = (panelBottom + panelTop) / 2;  // gap 中央
+    // 明顯的水平分隔線（2px 實線）
+    shapes.push({type:'line',xref:'paper',yref:'paper',x0:0,x1:1,y0:mid,y1:mid,
+                 line:{color:'rgba(255,255,255,0.35)',width:2}});
+    // 面板名稱：放在面板頂部內部
+    anns.push({xref:'paper',yref:'paper', x:0.01, y:panelTop-0.012,
+               text:'<b>'+label+'</b>', showarrow:false,
+               font:{size:11, color:color||'rgba(200,204,222,0.9)', family:"'Space Mono',monospace"},
+               xanchor:'left', yanchor:'top',
+               bgcolor:'rgba(4,6,20,0.8)', borderpad:4});
   };
-  if(hasMacd&&macdDom) addDiv(macdDom[1]+0.01,'MACD(12,26,9)','#e879f9');
-  if(hasKd&&kdDom)     addDiv(kdDom[1]+0.01,'KD(9)','#22d3ee');
-  if(hasInst&&instDom) addDiv(instDom[1]+0.01,'三大法人','#5ab4ff');
+  if(hasMacd&&macdDom) addDiv(macdDom[1], kDom[0], 'MACD(12,26,9)', '#e879f9');
+  if(hasKd&&kdDom)     addDiv(kdDom[1],   macdDom ? macdDom[0] : kDom[0], 'KD(9)', '#22d3ee');
+  if(hasInst&&instDom) addDiv(instDom[1], kdDom ? kdDom[0] : macdDom ? macdDom[0] : kDom[0], '三大法人', '#5ab4ff');
 
   // Per-panel inline legends (left side of each panel)
   const LX = 0.012;
   const addLeg=(items, panelTop)=>{
     items.forEach(([lbl,color,dash], i)=>{
       const sym = dash==='dot' ? '╌' : dash==='bar' ? '▌' : '─';
-      anns.push({xref:'paper',yref:'paper', x:LX, y:panelTop-0.024-i*0.026,
+      anns.push({xref:'paper',yref:'paper', x:LX, y:panelTop-0.038-i*0.026,
         text:`<b style="color:${color}">${sym}</b> ${lbl}`,
         showarrow:false,
         font:{color:'rgba(200,204,222,0.8)', size:8.5, family:"'Space Mono',monospace"},
@@ -1422,16 +1446,15 @@ function renderStockCombined(cid, kd, instData, accent) {
            rangeslider:{visible:false}, linecolor:'rgba(255,255,255,0.07)',
            automargin:false,
            showspikes:true, spikemode:'across', spikedash:'dot',
-           spikecolor:'rgba(255,255,255,0.28)', spikethickness:1, spikesnap:'cursor'},
+           spikecolor:'#253555', spikethickness:1},
     yaxis: {domain:kDom, gridcolor:'rgba(255,255,255,0.045)',
-            showspikes:true, spikemode:'toaxis', spikedash:'dot',
-            spikecolor:'rgba(255,255,255,0.22)', spikethickness:1,
+            showspikes:false,
             tickfont:{color:'rgba(200,204,222,0.7)'}},
     yaxis2:{domain:instDom||[0,0], gridcolor:'rgba(255,255,255,0.04)', tickformat:'.2s',
             zerolinecolor:'rgba(255,255,255,0.15)', showspikes:false, visible:hasInst&&!!instDom,
             tickfont:{color:'rgba(91,180,255,0.7)'}},
     yaxis3:{domain:macdDom||[0,0], gridcolor:'rgba(255,255,255,0.04)', tickformat:'.2f',
-            zerolinecolor:'rgba(255,255,255,0.2)', showspikes:false, visible:hasMacd&&!!macdDom,
+            zerolinecolor:'rgba(255,255,255,0.1)', showspikes:false, visible:hasMacd&&!!macdDom,
             tickfont:{color:'rgba(232,121,249,0.7)'}, nticks:4},
     yaxis4:{domain:kdDom||[0,0], gridcolor:'rgba(255,255,255,0.04)', range:[0,100],
             showspikes:false, visible:hasKd&&!!kdDom, nticks:5,
@@ -1458,6 +1481,78 @@ function renderStockCombined(cid, kd, instData, accent) {
       btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>標記技術訊號';
       btn.classList.remove('active');
     }
+  }
+}
+
+/* ── 回測日曆專用：三個獨立圖表 ─────────────────────────────── */
+function renderCalChartSplit(kd, accent) {
+  ['calChartKline','calChartMacd','calChartKd'].forEach(id=>{
+    const el=document.getElementById(id); if(el) Plotly.purge(id);
+  });
+  if(!kd||!kd.length) return;
+  const dates=kd.map(d=>d.date);
+  const BG={paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)'};
+  const FONT={color:'#c8ccde',family:"'Space Mono',monospace",size:10};
+  const XBASE={type:'category',gridcolor:'rgba(255,255,255,0.04)',
+               linecolor:'rgba(255,255,255,0.07)',rangeslider:{visible:false}};
+  const OPT={responsive:true,displayModeBar:false};
+
+  // ── K 線（含 MA）──────────────────────────────────────────────
+  const candle={
+    type:'candlestick',name:'K線',showlegend:false,
+    x:dates,open:kd.map(d=>d.o),high:kd.map(d=>d.h),
+    low:kd.map(d=>d.l),close:kd.map(d=>d.c),
+    increasing:{line:{color:'#5cd98a',width:1.5},fillcolor:'#5cd98a'},
+    decreasing:{line:{color:'#ff5f5f',width:1.5},fillcolor:'#ff5f5f'},
+    hovertemplate:'<b>%{x}</b><br>開 %{open:,.0f}　高 %{high:,.0f}　低 %{low:,.0f}　收 <b>%{close:,.0f}</b><extra></extra>',
+  };
+  Plotly.newPlot('calChartKline',
+    [candle,maLine(kd,'ma5','#ffc947'),maLine(kd,'ma10','#5ab4ff'),
+     maLine(kd,'ma20',accent||'#34d4c0'),maLine(kd,'ma60','#d080ff')],
+    {...BG,font:FONT,margin:{t:6,r:14,b:44,l:62},
+     xaxis:{...XBASE,tickangle:-45,nticks:10,automargin:true,
+            showspikes:true,spikemode:'across',spikedash:'dot',
+            spikecolor:'#253555',spikethickness:1},
+     yaxis:{gridcolor:'rgba(255,255,255,0.045)',showspikes:false},
+     showlegend:false,hovermode:'x unified',
+     hoverlabel:{bgcolor:'rgba(8,11,30,0.92)',bordercolor:'rgba(255,255,255,0.18)',
+                 font:{color:'#f0f2ff',size:11}}},OPT);
+
+  // ── MACD ──────────────────────────────────────────────────────
+  if(kd.some(d=>d.macd!=null)){
+    Plotly.newPlot('calChartMacd',[
+      {type:'bar',name:'柱',showlegend:false,
+       x:dates,y:kd.map(d=>d.hist),
+       marker:{color:kd.map(d=>(d.hist||0)>=0?'rgba(92,217,138,0.65)':'rgba(255,95,95,0.65)')},
+       hoverinfo:'skip'},
+      {type:'scatter',mode:'lines',name:'DIF',showlegend:false,
+       x:dates,y:kd.map(d=>d.macd),line:{color:'#e879f9',width:1.5},connectgaps:true,hoverinfo:'skip'},
+      {type:'scatter',mode:'lines',name:'DEA',showlegend:false,
+       x:dates,y:kd.map(d=>d.signal),line:{color:'#f59e0b',width:1.5,dash:'dot'},connectgaps:true,hoverinfo:'skip'},
+    ],{...BG,font:FONT,margin:{t:2,r:14,b:2,l:62},
+       xaxis:{...XBASE,showticklabels:false},
+       yaxis:{gridcolor:'rgba(255,255,255,0.04)',tickformat:'.0f',
+              zerolinecolor:'rgba(255,255,255,0.12)',showspikes:false},
+       showlegend:false,hovermode:'closest'},OPT);
+  }
+
+  // ── KD ────────────────────────────────────────────────────────
+  if(kd.some(d=>d.k!=null)){
+    const d0=dates[0],dn=dates[dates.length-1];
+    Plotly.newPlot('calChartKd',[
+      {type:'scatter',mode:'lines',name:'K值',showlegend:false,
+       x:dates,y:kd.map(d=>d.k),line:{color:'#22d3ee',width:1.8},connectgaps:true,hoverinfo:'skip'},
+      {type:'scatter',mode:'lines',name:'D值',showlegend:false,
+       x:dates,y:kd.map(d=>d.d),line:{color:'#fb923c',width:1.8,dash:'dot'},connectgaps:true,hoverinfo:'skip'},
+      {type:'scatter',mode:'lines',x:[d0,dn],y:[80,80],showlegend:false,
+       line:{color:'rgba(251,146,60,0.2)',width:1,dash:'dot'},hoverinfo:'skip'},
+      {type:'scatter',mode:'lines',x:[d0,dn],y:[20,20],showlegend:false,
+       line:{color:'rgba(34,211,238,0.2)',width:1,dash:'dot'},hoverinfo:'skip'},
+    ],{...BG,font:FONT,margin:{t:2,r:14,b:36,l:62},
+       xaxis:{...XBASE,tickangle:-45,nticks:10},
+       yaxis:{gridcolor:'rgba(255,255,255,0.04)',range:[0,100],
+              showspikes:false,tickvals:[0,20,50,80,100]},
+       showlegend:false,hovermode:'closest'},OPT);
   }
 }
 
@@ -2705,23 +2800,44 @@ $('#calSearchBtn').on('click', function(){
   $(this).prop('disabled',true).html('<span class="spinner-ring" style="width:12px;height:12px;border-width:2px;"></span> 載入中…');
   $('#cal-placeholder').hide();
   $('#cal-chart-area').hide();
-  $.get('/api/stock_kline?id='+sid+'&days='+(days+120), function(res){
+  $.get('/api/stock_kline?id='+sid+'&days='+(days+180), function(res){
     $('#calSearchBtn').prop('disabled',false).html('<i class="bi bi-search me-1"></i>查詢回測');
     if(!res.success||!res.k_data||!res.k_data.length){$('#cal-placeholder').text('無資料').show();return;}
-    // Find start date index
+    // 讓起點落在圖表左側 1/3 處
+    // 做法：先看 startDate 後面實際有幾根K棒（afterLen），
+    //       前面放 afterLen/2 的歷史背景，使起點位置 = afterLen/2 / (afterLen/2 + afterLen) = 1/3
     const allData=res.k_data;
-    const startIdx=allData.findIndex(d=>d.date>=date);
-    const displayData=startIdx>=0?allData.slice(Math.max(0,startIdx-5)):allData;
-    const sliced=displayData.slice(0,days+10);
+    const startIdx=allData.findIndex(function(d){return d.date>=date;});
+    let sliced;
+    if(startIdx<0){
+      sliced=allData.slice(-days);
+    } else {
+      const afterData=allData.slice(startIdx);           // 起點之後（含）的資料
+      const afterLen=Math.min(afterData.length, days);   // 最多取 days 根
+      const pre=Math.round(afterLen/2);                  // 前面放一半，讓起點在 1/3
+      const from=Math.max(0, startIdx-pre);
+      sliced=allData.slice(from, startIdx+afterLen+5);
+    }
     $('#cal-chart-title').text(sid+' '+name+' — 回測區間 '+date);
     $('#cal-chart-sub').text('共 '+sliced.length+' 個交易日');
     $('#cal-chart-area').show();
-    renderStockCombined('calChartContainer',sliced,null,'#5ab4ff');
-    // Apply zone analysis after chart renders
+    renderCalChartSplit(sliced,'#5ab4ff');
     if(sliced.length){
+      // 先設好起點在 1/3 的視圖範圍，再套用 zone 分析
+      const _si=sliced.findIndex(function(d){return d.date>=date;});
+      if(_si>=0){
+        const _after=sliced.length-_si;
+        const _pre=Math.round(_after/2);
+        const _vs=Math.max(-0.5,_si-_pre-0.5);
+        const _ve=sliced.length-0.5;
+        // 等 Plotly 渲染好後鎖定 range
+        setTimeout(function(){
+          Plotly.relayout('calChartKline',{'xaxis.autorange':false,'xaxis.range':[_vs,_ve]});
+        },150);
+      }
       setTimeout(function(){
-        applyZoneAnalysis('calChartContainer', sliced, date);
-      }, 300);
+        applyZoneAnalysis('calChartKline', sliced, date);
+      }, 450);
     }
   });
 });
@@ -3003,8 +3119,8 @@ function detectTransitionReason(curr, prev, volMA) {
 function applyZoneAnalysis(cid, kd, startDate) {
   const el = document.getElementById(cid);
   if (!el || !el._fullLayout) return;
-  const fl = el._fullLayout;
-  const kDom = fl.yaxis && fl.yaxis.domain ? fl.yaxis.domain : [0.5, 1.0];
+  // calChartKline 是獨立圖表，整個 paper 就是 K 線面板
+  const kDom = [0, 1];
 
   const atrArr = computeATR14(kd);
   const volMA = computeVolMA(kd);
@@ -3039,9 +3155,9 @@ function applyZoneAnalysis(cid, kd, startDate) {
   const shapes = [];
   const anns = [];
   const ZONE_FILL = {
-    bull:    'rgba(220,70,50,0.13)',   // 台灣紅=多方
-    neutral: 'rgba(200,160,30,0.09)',
-    bear:    'rgba(50,120,240,0.13)',  // 台灣藍=空方
+    bull:    'rgba(220,70,50,0.15)',
+    neutral: 'rgba(220,180,0,0.14)',   // 提高透明度讓黃色可見
+    bear:    'rgba(50,120,240,0.15)',
   };
   const ZONE_TC = { bull:'#ff8060', neutral:'#ffd060', bear:'#70b8ff' };
   const ZONE_LABELS = { bull:'多方格局', neutral:'盤整觀察', bear:'空方格局' };
@@ -3059,76 +3175,128 @@ function applyZoneAnalysis(cid, kd, startDate) {
     const avgRisk = g.risks.reduce(function(a,b){return a+b;},0)/g.risks.length;
     const si = allDates.indexOf(g.start);
     const ei = allDates.indexOf(g.end);
-    // Use numeric index ±0.5 so adjacent zones are perfectly contiguous (no gap)
     const x0 = si - 0.5;
     const x1 = ei + 0.5;
 
+    // Reason for this zone's start
+    const prevDay = si > 0 ? kd[si-1] : null;
+    const currDay = kd[si];
+    const reason = gi > 0
+      ? detectTransitionReason(currDay, prevDay, volMA[si])
+      : '起始分析點';
+    const RISK_LEVEL = avgRisk<6?'低風險 🟢':avgRisk<12?'中度風險 🟡':avgRisk<20?'高風險 🟠':'極高風險 🔴';
+
+    // Zone background rect
     shapes.push({
       type:'rect', xref:'x', yref:'paper',
-      x0, x1,
-      y0:kDom[0], y1:kDom[1],
+      x0, x1, y0:kDom[0], y1:kDom[1],
       fillcolor:ZONE_FILL[g.zone],
-      line:{width:0},   // no border → eliminates thin-line artifacts
-      layer:'below'
+      line:{width:0}, layer:'below'
     });
 
-    // Zone transition: dashed separator + triangle hover marker
+    // Dashed separator at zone boundary (skip first)
     if (gi > 0) {
-      const prevDay = si > 0 ? kd[si-1] : null;
-      const currDay = kd[si];
-      const reason = detectTransitionReason(currDay, prevDay, volMA[si]);
-      // Dashed divider at boundary (between zones)
       shapes.push({type:'line',xref:'x',yref:'paper',
         x0: si - 0.5, x1: si - 0.5, y0:kDom[0], y1:kDom[1],
-        line:{color:'rgba(255,255,255,0.18)',width:1,dash:'dot'}
+        line:{color:'rgba(255,255,255,0.14)',width:1,dash:'dot'}
       });
-      // Triangle hover marker at top of K-line panel
-      const priceAtTransition = currDay ? currDay.h : null;
-      if (priceAtTransition) {
-        const RISK_LEVEL = avgRisk<6?'低風險 🟢':avgRisk<12?'中度風險 🟡':avgRisk<20?'高風險 🟠':'極高風險 🔴';
-        hoverTraces.push({
-          type:'scatter', mode:'markers', showlegend:false, name:'',
-          x:[g.start], y:[priceAtTransition * 1.006],
-          marker:{symbol:'triangle-down', size:9, color:ZONE_TC[g.zone], opacity:0.85,
-                  line:{color:'rgba(255,255,255,0.5)',width:1}},
-          yaxis:'y',
-          hovertemplate:
-            '<b style="color:'+ZONE_TC[g.zone]+'">▶ '+ZONE_LABELS[g.zone]+'</b><br>'
-            +'%{x}  →  '+g.end+'（'+g.dates.length+'日）<br>'
-            +'<b>轉折原因：</b>'+reason+'<br>'
-            +'<b>區間風險：</b>'+avgRisk.toFixed(1)+'%  '+RISK_LEVEL
-            +'<extra></extra>',
-        });
-      }
     }
 
-    // Zone label: only on the largest group of each type
-    if (largestByType[g.zone] === g && g.dates.length >= 3) {
+    // 每個色塊都放一個 invisible scatter，點擊時顯示原因
+    var zoneCustom = {zone:g.zone, label:ZONE_LABELS[g.zone],
+      reason:reason, risk:avgRisk, riskLevel:RISK_LEVEL,
+      start:g.start, end:g.end, days:g.dates.length};
+    hoverTraces.push({
+      type:'scatter', mode:'markers', showlegend:false, name:'zone',
+      x: g.dates,
+      y: g.dates.map(function(dt){
+        var d=kd.find(function(k){return k.date===dt;});
+        return d ? d.h * 1.008 : null;
+      }),
+      marker:{opacity:0.001, size:18, color:ZONE_TC[g.zone]},
+      yaxis:'y',
+      hoverinfo:'skip',   // hover 不顯示，改為點擊顯示
+      customdata: g.dates.map(function(){ return zoneCustom; }),
+    });
+
+    // 每個色塊都顯示格局名稱 + 風險% label
+    if (g.dates.length >= 3) {
       const midIdx = Math.round((si + ei) / 2);
       const midDate = kd[midIdx] ? kd[midIdx].date : g.start;
+      const rl = avgRisk<6?'低':avgRisk<12?'中':avgRisk<20?'高':'極高';
       anns.push({
         xref:'x', yref:'paper',
-        x: midDate,
-        y: kDom[1] - 0.018,
-        text: ZONE_LABELS[g.zone],
+        x: midDate, y: kDom[1] - 0.02,
+        text: ZONE_LABELS[g.zone]+'<br><b>'+avgRisk.toFixed(1)+'%</b> '+rl+'風險',
         showarrow: false,
         font: {color: ZONE_TC[g.zone], size: 9, family:"'Space Mono',monospace"},
         xanchor: 'center', yanchor: 'top',
-        bgcolor: 'rgba(4,6,20,0.45)', borderpad: 3,
+        bgcolor: 'rgba(4,6,20,0.55)', borderpad: 3,
       });
     }
   });
 
-  // Start date marker
+  // 起點標示：只在 K 線面板（kDom 範圍），黃色細虛線
   shapes.push({type:'line',xref:'x',yref:'paper',
-    x0:startDate,x1:startDate,y0:0,y1:1,
-    line:{color:'rgba(255,200,80,0.65)',width:1.5,dash:'dash'}});
-  anns.push({xref:'x',yref:'paper',x:startDate,y:1.03,
+    x0:startDate,x1:startDate,y0:kDom[0],y1:kDom[1],
+    line:{color:'#ffc947',width:0.8,dash:'dash'}});
+  anns.push({xref:'x',yref:'paper',x:startDate,y:kDom[1]+0.03,
     text:'▼ 起點',showarrow:false,
     font:{color:'#ffc947',size:8},xanchor:'center'});
 
-  Plotly.relayout(cid, {shapes, annotations:anns});
+  // 計算起點視圖範圍（1/3 定位）
+  var startIdx2 = kd.findIndex(function(d){ return d.date >= startDate; });
+  var viewStart = -0.5, viewEnd = kd.length - 0.5;
+  if (startIdx2 >= 0) {
+    var afterLen2 = kd.length - startIdx2;
+    var pre2 = Math.round(afterLen2 / 2);
+    viewStart = Math.max(-0.5, startIdx2 - pre2 - 0.5);
+  }
+
+  // 合并 shapes/annotations
+  var prevShapes = (el.layout && el.layout.shapes) ? el.layout.shapes.slice() : [];
+  var prevAnns   = (el.layout && el.layout.annotations) ? el.layout.annotations.slice() : [];
+  Plotly.relayout(cid, {
+    shapes: prevShapes.concat(shapes),
+    annotations: prevAnns.concat(anns),
+    hovermode: 'x unified',
+  });
+
+  // addTraces：zone invisible scatters（點擊用）
   if (hoverTraces.length) Plotly.addTraces(cid, hoverTraces);
+
+  // 點擊事件：K棒 → OHLCV；色塊區間 → 原因＋風險
+  var calEl = document.getElementById(cid);
+  calEl.removeAllListeners && calEl.removeAllListeners('plotly_click');
+  calEl.on('plotly_click', function(clickData) {
+    if (!clickData || !clickData.points || !clickData.points.length) return;
+    var info = document.getElementById('cal-kbar-info');
+    if (!info) return;
+    var pt = clickData.points[0];
+    if (pt.data && pt.data.type === 'candlestick') {
+      var row = kd.find(function(d){return d.date===pt.x;});
+      var chgColor = pt.close >= pt.open ? '#5cd98a' : '#ff5f5f';
+      var chgPct = ((pt.close - pt.open) / pt.open * 100).toFixed(2);
+      info.innerHTML =
+        '📅 <b style="color:#ffc947;">'+pt.x+'</b>　'
+        +'開 <b>'+pt.open.toFixed(0)+'</b>　高 <b>'+pt.high.toFixed(0)+'</b>　'
+        +'低 <b>'+pt.low.toFixed(0)+'</b>　'
+        +'收 <b style="color:'+chgColor+'">'+pt.close.toFixed(0)+'</b>'
+        +' <span style="color:'+chgColor+';">('+chgPct+'%)</span>'
+        +(row&&row.v ? '　量 <b style="color:#a0b0d0;">'+Math.round(row.v/1000)+'K</b>' : '');
+    } else if (pt.data && pt.data.name === 'zone' && pt.customdata) {
+      var cd = pt.customdata;
+      var zc = {bull:'#ff8060',neutral:'#ffd060',bear:'#70b8ff'}[cd.zone]||'#c8ccde';
+      info.innerHTML =
+        '<b style="color:'+zc+'">'+cd.label+'</b>　'
+        +cd.start+' → '+cd.end+'（'+cd.days+'日）<br>'
+        +'<b>歸類原因：</b>'+cd.reason+'　'
+        +'<b>平均風險：</b><span style="color:'+(cd.risk<6?'#5cd98a':cd.risk<12?'#ffc947':cd.risk<20?'#ff8c42':'#ff5f5f')+'">'+cd.risk.toFixed(1)+'%</span>　'+cd.riskLevel;
+    } else { return; }
+    info.style.display = 'block';
+    clearTimeout(info._timer);
+    info._timer = setTimeout(function(){info.style.display='none';}, 6000);
+  });
 
   // Risk summary table below chart
   renderRiskSummary(groups, kd, zones);

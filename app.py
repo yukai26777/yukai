@@ -1,12 +1,13 @@
 import os
 import time
 from datetime import datetime, timedelta
+_APP_VER = str(int(time.time()))  # 每次重啟都不同
 from functools import wraps
 
 import pandas as pd
 import yfinance as yf
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request
 from FinMind.data import DataLoader
 
 load_dotenv()
@@ -195,7 +196,11 @@ MARKETS = {
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    resp = make_response(render_template("index.html", app_ver=_APP_VER))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 
 @app.route("/api/dashboard")
