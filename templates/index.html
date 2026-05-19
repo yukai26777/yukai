@@ -255,6 +255,45 @@
     /* Calendar page */
     .cal-search-wrap { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1.2rem 1.5rem; margin-bottom:1.5rem; }
 
+    /* === Journal PIN overlay === */
+    .jpin-overlay {
+      position:absolute; inset:0; z-index:50;
+      background:rgba(6,9,26,0.97); border-radius:inherit;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:1.2rem;
+    }
+    .jpin-title { font-size:.8rem; color:#7a85a3; }
+    .jpin-dots { display:flex; gap:.65rem; }
+    .jpin-dot { width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.2); transition:all .2s; }
+    .jpin-dot.filled { background:#34d4c0; border-color:#34d4c0; box-shadow:0 0 10px rgba(52,212,192,0.5); }
+    .jpin-numpad { display:grid; grid-template-columns:repeat(3,52px); gap:.5rem; }
+    .jpin-btn {
+      width:52px; height:52px; border-radius:50%; border:1px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.06); color:#f0f2ff; font-size:1.1rem; font-weight:600;
+      cursor:pointer; transition:all .15s;
+    }
+    .jpin-btn:hover { background:rgba(52,212,192,0.15); border-color:rgba(52,212,192,0.4); }
+    .jpin-err { color:#ff5f5f; font-size:.72rem; min-height:1rem; }
+    .jpin-hint { font-size:.62rem; color:#3a4260; cursor:pointer; }
+    .jpin-hint:hover { color:#7a85a3; }
+
+    /* === Journal total banner === */
+    .jtotal-banner {
+      display:grid; grid-template-columns:1fr 1fr 1.4fr 1fr;
+      gap:1rem; padding:1.2rem 1.4rem;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+      border-radius:14px; margin-bottom:1rem;
+    }
+    @media(max-width:700px){ .jtotal-banner{grid-template-columns:1fr 1fr;} }
+    .jtot-item { display:flex; flex-direction:column; gap:.2rem; }
+    .jtot-label { font-size:.6rem; color:#5a6480; text-transform:uppercase; letter-spacing:.07em; }
+    .jtot-val { font-family:'Space Mono',monospace; font-size:.95rem; font-weight:700; color:#f0f2ff; }
+    .jtot-big { font-size:1.6rem; font-weight:700; }
+
+    /* === Init form collapsible === */
+    .jinit-collapse { overflow:hidden; transition:max-height .3s ease, opacity .3s ease; max-height:0; opacity:0; }
+    .jinit-collapse.open { max-height:400px; opacity:1; }
+
     /* === Hamburger Button === */
     .sidebar-toggle-btn {
       width:34px; height:34px; border-radius:8px; flex-shrink:0;
@@ -480,13 +519,15 @@
           <circle cx="150" cy="155" r="130" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
           <circle cx="150" cy="155" r="120" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="0.5"/>
           <!-- Background dim arc (270°, lower-left to lower-right clockwise through top) -->
-          <path d="M 72.2 232.8 A 110 110 0 1 1 227.8 232.8" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="18" stroke-linecap="round"/>
-          <!-- Zone segments (clockwise, fear→greed, each 54°) -->
-          <path d="M 72.2 232.8 A 110 110 0 0 1 41.4 137.8" fill="none" stroke="#1144ee" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
-          <path d="M 41.4 137.8 A 110 110 0 0 1 100.1 57.0" fill="none" stroke="#ff4433" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
-          <path d="M 100.1 57.0 A 110 110 0 0 1 199.9 57.0" fill="none" stroke="#ffd040" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
-          <path d="M 199.9 57.0 A 110 110 0 0 1 258.6 137.8" fill="none" stroke="#8ada20" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
-          <path d="M 258.6 137.8 A 110 110 0 0 1 227.8 232.8" fill="none" stroke="#00e870" stroke-width="14" filter="url(#gn)" opacity="0.85"/>
+          <path d="M 72.2 232.8 A 110 110 0 1 1 227.8 232.8" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="18" stroke-linecap="round"/>
+          <!-- Soft inner glow ring -->
+          <circle cx="150" cy="155" r="108" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="6"/>
+          <!-- Zone segments (clockwise, fear→greed, semi-transparent soft) -->
+          <path d="M 72.2 232.8 A 110 110 0 0 1 41.4 137.8" fill="none" stroke="rgba(80,110,220,0.55)" stroke-width="14" stroke-linecap="butt"/>
+          <path d="M 41.4 137.8 A 110 110 0 0 1 100.1 57.0" fill="none" stroke="rgba(220,90,70,0.50)" stroke-width="14" stroke-linecap="butt"/>
+          <path d="M 100.1 57.0 A 110 110 0 0 1 199.9 57.0" fill="none" stroke="rgba(200,165,40,0.52)" stroke-width="14" stroke-linecap="butt"/>
+          <path d="M 199.9 57.0 A 110 110 0 0 1 258.6 137.8" fill="none" stroke="rgba(110,185,80,0.50)" stroke-width="14" stroke-linecap="butt"/>
+          <path d="M 258.6 137.8 A 110 110 0 0 1 227.8 232.8" fill="none" stroke="rgba(40,175,110,0.55)" stroke-width="14" stroke-linecap="butt"/>
           <!-- VIX value labels around arc -->
           <text x="55" y="250" fill="rgba(255,255,255,0.4)" font-size="9" font-family="'Space Mono',monospace" text-anchor="middle">40</text>
           <text x="28" y="142" fill="rgba(255,255,255,0.3)" font-size="8" font-family="'Space Mono',monospace" text-anchor="middle">34</text>
@@ -511,7 +552,7 @@
           <text id="gaugeSentLabel" x="150" y="178" text-anchor="middle" font-family="'Space Mono',monospace" font-size="11" font-weight="700" fill="#7a85a3">—</text>
         </svg>
         <div style="display:flex;justify-content:space-between;width:215px;margin-top:-.5rem;">
-          <span style="font-size:.54rem;color:#1144ee;">恐慌</span>
+          <span style="font-size:.54rem;color:rgba(80,110,220,0.8);">恐慌</span>
           <span style="font-size:.54rem;color:#ffd040;">中性</span>
           <span style="font-size:.54rem;color:#00e870;">貪婪</span>
         </div>
@@ -668,14 +709,33 @@
   </div>
 
 </main>
-
-</main>
 </div><!-- /#page-home -->
 
 <!-- ══ Page: 記帳表 ═════════════════════════════════════════════ -->
-<div class="app-page" id="page-journal">
+<div class="app-page" id="page-journal" style="position:relative;">
+  <!-- PIN Overlay -->
+  <div class="jpin-overlay" id="jpinOverlay" style="display:none;">
+    <div class="jpin-title" id="jpinTitle">輸入 PIN 碼</div>
+    <div class="jpin-dots" id="jpinDots">
+      <div class="jpin-dot" id="jpd0"></div>
+      <div class="jpin-dot" id="jpd1"></div>
+      <div class="jpin-dot" id="jpd2"></div>
+      <div class="jpin-dot" id="jpd3"></div>
+    </div>
+    <div class="jpin-numpad">
+      <button class="jpin-btn" data-n="1">1</button><button class="jpin-btn" data-n="2">2</button><button class="jpin-btn" data-n="3">3</button>
+      <button class="jpin-btn" data-n="4">4</button><button class="jpin-btn" data-n="5">5</button><button class="jpin-btn" data-n="6">6</button>
+      <button class="jpin-btn" data-n="7">7</button><button class="jpin-btn" data-n="8">8</button><button class="jpin-btn" data-n="9">9</button>
+      <button class="jpin-btn" data-n="clear" style="font-size:.75rem;color:#7a85a3;">清除</button>
+      <button class="jpin-btn" data-n="0">0</button>
+      <button class="jpin-btn" data-n="del" style="font-size:.8rem;color:#7a85a3;">⌫</button>
+    </div>
+    <div class="jpin-err" id="jpinErr"></div>
+    <div class="jpin-hint" id="jpinReset">忘記 PIN？點此重設（將清空所有資料）</div>
+  </div>
+  <!-- Page Header -->
   <div class="page-header">
-    <div class="container-xl d-flex align-items-center gap-3">
+    <div class="container-xl d-flex align-items:center gap-3">
       <button class="page-back-btn" data-page="home"><i class="bi bi-arrow-left me-1"></i>返回儀表板</button>
       <span style="font-size:.9rem;font-weight:700;color:#34d4c0;"><i class="bi bi-journal-bookmark me-2"></i>股票記帳表</span>
     </div>
@@ -685,9 +745,28 @@
     <div><!-- LEFT col -->
         <!-- LEFT: Trade Table -->
         <div>
+          <!-- Total P&L Banner -->
+          <div class="jtotal-banner" id="jtotal-banner" style="display:none;">
+            <div class="jtot-item"><div class="jtot-label">總成本</div><div class="jtot-val" id="jtot-cost">—</div></div>
+            <div class="jtot-item"><div class="jtot-label">持倉市值</div><div class="jtot-val" id="jtot-mktval">—</div></div>
+            <div class="jtot-item">
+              <div class="jtot-label">未實現損益</div>
+              <div class="jtot-big" id="jtot-pnl" style="color:#5cd98a;">—</div>
+            </div>
+            <div class="jtot-item">
+              <div class="jtot-label">總報酬率</div>
+              <div class="jtot-big" id="jtot-pct" style="color:#5cd98a;">—</div>
+            </div>
+          </div>
           <!-- Positions -->
           <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:1.2rem;margin-bottom:1rem;">
-            <div style="font-size:.72rem;font-weight:700;color:#9aaac8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.8rem;">📊 持倉摘要</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;">
+              <span style="font-size:.72rem;font-weight:700;color:#9aaac8;text-transform:uppercase;letter-spacing:.08em;">📊 持倉摘要</span>
+              <div style="display:flex;gap:.5rem;">
+                <button id="updatePricesBtn2" style="font-size:.62rem;padding:.2rem .55rem;border-radius:7px;background:rgba(52,212,192,0.1);border:1px solid rgba(52,212,192,0.35);color:#34d4c0;cursor:pointer;"><i class="bi bi-arrow-repeat me-1"></i>更新收盤價</button>
+                <button id="lockJournalBtn" style="font-size:.62rem;padding:.2rem .55rem;border-radius:7px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:#7a85a3;cursor:pointer;"><i class="bi bi-lock me-1"></i>鎖定</button>
+              </div>
+            </div>
             <div id="jpage-positions" style="color:#c8ccde;font-size:.82rem;"></div>
           </div>
           <!-- Trade history -->
@@ -711,9 +790,35 @@
               </table>
             </div>
           </div>
+        </div><!-- closes extra div L687 -->
         </div><!-- end left col -->
         <!-- RIGHT: Forms -->
         <div>
+          <!-- Initialize Position FIRST (collapsible) -->
+          <div style="margin-bottom:.8rem;">
+            <button id="toggleInitFormBtn" style="width:100%;padding:.6rem 1rem;border-radius:10px;border:1px dashed rgba(255,180,50,0.4);background:rgba(255,200,70,0.05);color:#ffc947;font-size:.75rem;font-weight:600;cursor:pointer;text-align:left;">
+              <i class="bi bi-database-add me-2"></i>⊞ 設定初始持倉（第一次使用或修正成本）<span style="float:right;opacity:.6;" id="initArrow">▾</span>
+            </button>
+            <div class="jinit-collapse" id="initFormCollapse" style="background:rgba(255,200,70,0.04);border:1px solid rgba(255,180,50,0.2);border-top:none;border-radius:0 0 10px 10px;padding:1rem;">
+            <form id="journalInitForm" class="journal-form">
+              <div class="jf-row">
+                <div><label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">股票代號</label>
+                  <input type="text" class="jf-input" id="jinit-sid" placeholder="如 2330" style="text-transform:uppercase;" autocomplete="off"></div>
+                <div><label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">股票名稱</label>
+                  <input type="text" class="jf-input" id="jinit-name" placeholder="自動帶入" readonly></div>
+              </div>
+              <div class="jf-row">
+                <div><label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">持股數量</label>
+                  <input type="number" class="jf-input" id="jinit-shares" placeholder="1000" min="1" step="1"></div>
+                <div><label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">平均成本（每股）</label>
+                  <input type="number" class="jf-input" id="jinit-cost" placeholder="0.00" step="0.01"></div>
+              </div>
+              <button type="submit" class="jf-submit" style="background:linear-gradient(135deg,rgba(255,200,70,.15),rgba(255,150,30,.1));border-color:rgba(255,180,50,.4);color:#ffc947;">
+                <i class="bi bi-database me-1"></i>設定初始持倉</button>
+            </form>
+            </div>
+          </div>
+          <!-- New Trade Form BELOW -->
           <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:1.2rem;margin-bottom:1rem;">
             <div style="font-size:.72rem;font-weight:700;color:#9aaac8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;">✚ 新增交易</div>
             <form id="journalFormFull" class="journal-form">
@@ -764,42 +869,11 @@
               <button type="submit" class="jf-submit" style="margin-top:.3rem;"><i class="bi bi-plus-lg me-1"></i>新增紀錄</button>
             </form>
           </div>
-          <!-- Initialize Position -->
-          <div style="background:rgba(255,200,70,0.06);border:1px solid rgba(255,180,50,0.3);border-radius:14px;padding:1.2rem;margin-top:1rem;">
-            <div style="font-size:.72rem;font-weight:700;color:#ffc947;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;">⊞ 初始化持倉 <span style="font-size:.6rem;color:#7a85a3;font-weight:400;text-transform:none;">（直接設定現有持倉成本）</span></div>
-            <form id="journalInitForm" class="journal-form">
-              <div class="jf-row">
-                <div>
-                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">股票代號</label>
-                  <input type="text" class="jf-input" id="jinit-sid" placeholder="如 2330" style="text-transform:uppercase;" autocomplete="off">
-                </div>
-                <div>
-                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">股票名稱</label>
-                  <input type="text" class="jf-input" id="jinit-name" placeholder="自動帶入" readonly>
-                </div>
-              </div>
-              <div class="jf-row">
-                <div>
-                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">持股數量</label>
-                  <input type="number" class="jf-input" id="jinit-shares" placeholder="1000" min="1" step="1">
-                </div>
-                <div>
-                  <label style="font-size:.65rem;color:#5a6480;display:block;margin-bottom:.2rem;">平均成本（每股）</label>
-                  <input type="number" class="jf-input" id="jinit-cost" placeholder="0.00" step="0.01">
-                </div>
-              </div>
-              <button type="submit" class="jf-submit" style="background:linear-gradient(135deg,rgba(255,200,70,.15),rgba(255,150,30,.1));border-color:rgba(255,180,50,.4);color:#ffc947;">
-                <i class="bi bi-database me-1"></i>設定初始持倉
-              </button>
-            </form>
-          </div>
           <!-- P&L Summary -->
           <div style="background:rgba(52,212,192,0.06);border:1px solid rgba(52,212,192,0.2);border-radius:14px;padding:1.2rem;margin-top:1rem;" id="jpage-pnl-card">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;">
               <span style="font-size:.72rem;font-weight:700;color:#34d4c0;text-transform:uppercase;letter-spacing:.08em;">💰 損益總覽</span>
-              <button id="updatePricesBtn" style="font-size:.65rem;padding:.25rem .65rem;border-radius:8px;background:rgba(52,212,192,0.1);border:1px solid rgba(52,212,192,0.35);color:#34d4c0;cursor:pointer;">
-                <i class="bi bi-arrow-repeat me-1"></i>更新收盤價
-              </button>
+              <span id="jpage-pnl-updated" style="font-size:.6rem;color:#3a4260;"></span>
             </div>
             <div id="jpage-price-date" style="font-size:.6rem;color:#5a7060;margin-bottom:.5rem;"></div>
             <div id="jpage-pnl" style="color:#c8ccde;font-size:.8rem;"><div style="color:#5a6480;text-align:center;padding:.8rem;">新增持倉後顯示</div></div>
@@ -856,6 +930,18 @@
       <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;">
         <div id="calChartContainer" style="height:680px;"></div>
       </div>
+      <!-- K-bar click info -->
+      <div id="cal-kbar-info" style="display:none;padding:.45rem 1rem;margin-top:.5rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,200,80,0.25);border-radius:10px;font-size:.78rem;color:#c8ccde;font-family:'Space Mono',monospace;"></div>
+      <!-- Zone Legend -->
+      <div style="display:flex;gap:.9rem;align-items:center;padding:.5rem 0;flex-wrap:wrap;">
+        <span style="font-size:.6rem;color:#5a6480;text-transform:uppercase;letter-spacing:.07em;">色塊說明</span>
+        <span style="font-size:.68rem;color:#ff8060;"><span style="display:inline-block;width:12px;height:8px;background:rgba(255,80,60,0.25);border-radius:2px;margin-right:.3rem;"></span>多方格局</span>
+        <span style="font-size:.68rem;color:#ffd060;"><span style="display:inline-block;width:12px;height:8px;background:rgba(230,180,40,0.2);border-radius:2px;margin-right:.3rem;"></span>盤整觀察</span>
+        <span style="font-size:.68rem;color:#70b8ff;"><span style="display:inline-block;width:12px;height:8px;background:rgba(70,140,255,0.2);border-radius:2px;margin-right:.3rem;"></span>空方格局</span>
+        <span style="font-size:.62rem;color:#3a4260;">│ 移到色塊查格局原因 · 點擊 K 棒查 OHLCV</span>
+      </div>
+      <!-- Risk Summary -->
+      <div id="cal-risk-summary" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;margin-top:1rem;"></div>
     </div>
     <div id="cal-placeholder" style="text-align:center;padding:4rem;color:#4a5270;">
       <i class="bi bi-calendar3" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:#3a4260;"></i>
@@ -1261,55 +1347,71 @@ function renderStockCombined(cid, kd, instData, accent) {
      yaxis:'y3', hovertemplate:'柱: %{y:.2f}<extra></extra>'},
     {type:'scatter', mode:'lines', name:'DIF',
      x:kd.map(d=>d.date), y:kd.map(d=>d.macd),
-     line:{color:'#5ab4ff',width:1.5}, yaxis:'y3', connectgaps:true,
+     line:{color:'#e879f9',width:1.5}, yaxis:'y3', connectgaps:true,
      hovertemplate:'DIF: %{y:.2f}<extra></extra>'},
     {type:'scatter', mode:'lines', name:'DEA',
      x:kd.map(d=>d.date), y:kd.map(d=>d.signal),
-     line:{color:'#ffc947',width:1.5,dash:'dot'}, yaxis:'y3', connectgaps:true,
+     line:{color:'#f59e0b',width:1.5,dash:'dot'}, yaxis:'y3', connectgaps:true,
      hovertemplate:'DEA: %{y:.2f}<extra></extra>'},
   ] : [];
 
-  // KD (y4) — K=blue, D=red (standard colours)
+  // KD (y4) — K=cyan, D=orange (distinct from MA lines)
   const dates0=kd[0].date, datesN=kd[kd.length-1].date;
   const kdTrs = hasKd ? [
     {type:'scatter', mode:'lines', name:'K值', showlegend:false,
      x:kd.map(d=>d.date), y:kd.map(d=>d.k),
-     line:{color:'#5ab4ff',width:1.8}, yaxis:'y4', connectgaps:true,
+     line:{color:'#22d3ee',width:1.8}, yaxis:'y4', connectgaps:true,
      hovertemplate:'K: %{y:.1f}<extra></extra>'},
     {type:'scatter', mode:'lines', name:'D值', showlegend:false,
      x:kd.map(d=>d.date), y:kd.map(d=>d.d),
-     line:{color:'#ff5f5f',width:1.8,dash:'dot'}, yaxis:'y4', connectgaps:true,
+     line:{color:'#fb923c',width:1.8,dash:'dot'}, yaxis:'y4', connectgaps:true,
      hovertemplate:'D: %{y:.1f}<extra></extra>'},
     {type:'scatter', mode:'lines', x:[dates0,datesN], y:[80,80], showlegend:false,
-     line:{color:'rgba(255,95,95,0.25)',width:1,dash:'dot'}, yaxis:'y4', hoverinfo:'skip'},
+     line:{color:'rgba(251,146,60,0.25)',width:1,dash:'dot'}, yaxis:'y4', hoverinfo:'skip'},
     {type:'scatter', mode:'lines', x:[dates0,datesN], y:[20,20], showlegend:false,
-     line:{color:'rgba(90,180,255,0.25)',width:1,dash:'dot'}, yaxis:'y4', hoverinfo:'skip'},
+     line:{color:'rgba(34,211,238,0.25)',width:1,dash:'dot'}, yaxis:'y4', hoverinfo:'skip'},
   ] : [];
 
-  // Dividers, section labels & per-panel inline legends
+  // Panel separator lines + title annotations
   const shapes=[], anns=[];
-  const addDiv=(y, label)=>{
-    shapes.push({type:'line',xref:'paper',yref:'paper',x0:0,x1:1,y0:y,y1:y,line:{color:'rgba(255,255,255,0.07)',width:1}});
-    anns.push({xref:'paper',yref:'paper',x:0,y:y-0.013,text:label,showarrow:false,font:{size:9,color:'rgba(255,255,255,0.3)'},xanchor:'left'});
+  // Subtle panel background rects for sub-panels
+  const addPanelBg=(dom, color)=>{
+    shapes.push({type:'rect',xref:'paper',yref:'paper',x0:0,x1:1,y0:dom[0],y1:dom[1],
+                 fillcolor:color,line:{width:0},layer:'below'});
   };
-  if(hasMacd&&macdDom) addDiv(macdDom[1]+0.01,'MACD(12,26,9)');
-  if(hasKd&&kdDom)     addDiv(kdDom[1]+0.01,'KD(9)');
-  if(hasInst&&instDom) addDiv(instDom[1]+0.01,'三大法人（日淨買賣）');
+  if(hasMacd&&macdDom) addPanelBg(macdDom,'rgba(0,0,0,0.12)');
+  if(hasKd&&kdDom)     addPanelBg(kdDom,  'rgba(0,0,0,0.18)');
+  if(hasInst&&instDom) addPanelBg(instDom,'rgba(0,0,0,0.12)');
+
+  // Visible separator line + prominent panel title
+  const addDiv=(y, label, color)=>{
+    shapes.push({type:'line',xref:'paper',yref:'paper',x0:0,x1:1,y0:y,y1:y,
+                 line:{color:'rgba(255,255,255,0.22)',width:1.5}});
+    anns.push({xref:'paper',yref:'paper',x:1,y:y-0.004,text:label,
+               showarrow:false,
+               font:{size:9,color:color||'rgba(200,204,222,0.75)',family:"'Space Mono',monospace"},
+               xanchor:'right',yanchor:'top',
+               bgcolor:'rgba(4,6,20,0.55)',borderpad:3});
+  };
+  if(hasMacd&&macdDom) addDiv(macdDom[1]+0.01,'MACD(12,26,9)','#e879f9');
+  if(hasKd&&kdDom)     addDiv(kdDom[1]+0.01,'KD(9)','#22d3ee');
+  if(hasInst&&instDom) addDiv(instDom[1]+0.01,'三大法人','#5ab4ff');
 
   // Per-panel inline legends (left side of each panel)
-  const LX = 0.012; // left x position in paper coords
+  const LX = 0.012;
   const addLeg=(items, panelTop)=>{
     items.forEach(([lbl,color,dash], i)=>{
-      const sym = dash==='dot' ? '╌ ' : dash==='bar' ? '▌ ' : '─ ';
-      anns.push({xref:'paper',yref:'paper', x:LX, y:panelTop-0.028-i*0.028,
-        text:sym+lbl, showarrow:false,
-        font:{color, size:8.5, family:"'Space Mono',monospace"},
+      const sym = dash==='dot' ? '╌' : dash==='bar' ? '▌' : '─';
+      anns.push({xref:'paper',yref:'paper', x:LX, y:panelTop-0.024-i*0.026,
+        text:`<b style="color:${color}">${sym}</b> ${lbl}`,
+        showarrow:false,
+        font:{color:'rgba(200,204,222,0.8)', size:8.5, family:"'Space Mono',monospace"},
         xanchor:'left', yanchor:'top'});
     });
   };
   addLeg([['MA5','#ffc947',''],['MA10','#5ab4ff',''],['MA20',accent||'#34d4c0',''],['MA60','#d080ff','']], kDom[1]);
-  if(hasMacd&&macdDom) addLeg([['MACD柱','#5cd98a','bar'],['DIF','#5ab4ff',''],['DEA','#ffc947','dot']], macdDom[1]);
-  if(hasKd&&kdDom)     addLeg([['K','#5ab4ff',''],['D','#ff5f5f','dot']], kdDom[1]);
+  if(hasMacd&&macdDom) addLeg([['柱','#5cd98a','bar'],['DIF','#e879f9',''],['DEA','#f59e0b','dot']], macdDom[1]);
+  if(hasKd&&kdDom)     addLeg([['K值','#22d3ee',''],['D值','#fb923c','dot']], kdDom[1]);
   if(hasInst&&instDom) addLeg([['外資','#5ab4ff','bar'],['投信','#5cd98a','bar'],['自營商','#d080ff','bar']], instDom[1]);
 
   const layout = {
@@ -1323,13 +1425,17 @@ function renderStockCombined(cid, kd, instData, accent) {
            spikecolor:'rgba(255,255,255,0.28)', spikethickness:1, spikesnap:'cursor'},
     yaxis: {domain:kDom, gridcolor:'rgba(255,255,255,0.045)',
             showspikes:true, spikemode:'toaxis', spikedash:'dot',
-            spikecolor:'rgba(255,255,255,0.22)', spikethickness:1},
+            spikecolor:'rgba(255,255,255,0.22)', spikethickness:1,
+            tickfont:{color:'rgba(200,204,222,0.7)'}},
     yaxis2:{domain:instDom||[0,0], gridcolor:'rgba(255,255,255,0.04)', tickformat:'.2s',
-            zerolinecolor:'rgba(255,255,255,0.15)', showspikes:false, visible:hasInst&&!!instDom},
+            zerolinecolor:'rgba(255,255,255,0.15)', showspikes:false, visible:hasInst&&!!instDom,
+            tickfont:{color:'rgba(91,180,255,0.7)'}},
     yaxis3:{domain:macdDom||[0,0], gridcolor:'rgba(255,255,255,0.04)', tickformat:'.2f',
-            zerolinecolor:'rgba(255,255,255,0.2)', showspikes:false, visible:hasMacd&&!!macdDom},
+            zerolinecolor:'rgba(255,255,255,0.2)', showspikes:false, visible:hasMacd&&!!macdDom,
+            tickfont:{color:'rgba(232,121,249,0.7)'}, nticks:4},
     yaxis4:{domain:kdDom||[0,0], gridcolor:'rgba(255,255,255,0.04)', range:[0,100],
-            showspikes:false, visible:hasKd&&!!kdDom, nticks:4},
+            showspikes:false, visible:hasKd&&!!kdDom, nticks:5,
+            tickvals:[0,20,50,80,100], tickfont:{color:'rgba(34,211,238,0.7)'}},
     barmode:'group', shapes, annotations:anns,
     showlegend:false,
     hoverlabel:{bgcolor:'rgba(8,11,30,0.95)', bordercolor:'rgba(255,255,255,0.2)',
@@ -2078,6 +2184,121 @@ $('#analyzeCloseBtn').on('click',function(){
   $('#analyzeOverlay').hide();
 });
 
+/* ── Journal PIN Protection ───────────────────────────────────── */
+const _PIN_KEY = 'spoc-pin-v1';
+let _jpinBuffer = '', _jpinMode = ''; // 'verify' | 'set'
+
+function _pinHash(s) { // simple reversible obfuscation (personal tool, not cryptographic)
+  return btoa(s.split('').reverse().join('') + 'spoc2026');
+}
+function _pinCheck(s) {
+  return localStorage.getItem(_PIN_KEY) === _pinHash(s);
+}
+function _pinSet(s) {
+  localStorage.setItem(_PIN_KEY, _pinHash(s));
+}
+function _pinExists() { return !!localStorage.getItem(_PIN_KEY); }
+
+let _jpinUnlocked = false; // session flag
+
+function openJournalWithPin() {
+  if (_jpinUnlocked) { renderAllJournal(); return; }
+  const overlay = document.getElementById('jpinOverlay');
+  overlay.style.display = 'flex';
+  _jpinBuffer = '';
+  if (!_pinExists()) {
+    _jpinMode = 'set';
+    document.getElementById('jpinTitle').textContent = '首次使用：請設定 4 位 PIN 碼';
+  } else {
+    _jpinMode = 'verify';
+    document.getElementById('jpinTitle').textContent = '請輸入 PIN 碼';
+  }
+  _updatePinDots();
+  document.getElementById('jpinErr').textContent = '';
+}
+
+function _updatePinDots() {
+  for (let i=0;i<4;i++) {
+    const dot=document.getElementById('jpd'+i);
+    dot.classList.toggle('filled', i < _jpinBuffer.length);
+  }
+  if (_jpinBuffer.length === 4) {
+    setTimeout(_pinSubmit, 150);
+  }
+}
+
+function _pinSubmit() {
+  if (_jpinMode === 'set') {
+    _pinSet(_jpinBuffer);
+    _jpinUnlocked = true;
+    document.getElementById('jpinOverlay').style.display = 'none';
+    renderAllJournal();
+  } else {
+    if (_pinCheck(_jpinBuffer)) {
+      _jpinUnlocked = true;
+      document.getElementById('jpinOverlay').style.display = 'none';
+      renderAllJournal();
+    } else {
+      document.getElementById('jpinErr').textContent = '密碼錯誤，請再試';
+      _jpinBuffer = '';
+      _updatePinDots();
+    }
+  }
+}
+
+$(document).on('click', '.jpin-btn', function(){
+  const n = $(this).data('n')+'';
+  if (n === 'clear') { _jpinBuffer = ''; }
+  else if (n === 'del') { _jpinBuffer = _jpinBuffer.slice(0,-1); }
+  else if (_jpinBuffer.length < 4) { _jpinBuffer += n; }
+  _updatePinDots();
+});
+
+$('#jpinReset').on('click', function(){
+  if (!confirm('確定重設 PIN？這將清空所有記帳資料！')) return;
+  localStorage.removeItem(_PIN_KEY);
+  _jnl.trades=[]; _jnl.initPos=[]; _jnl.prices={};
+  _jnl.save(); _jnl.saveInit(); _jnl.savePrices();
+  _jpinBuffer=''; _jpinUnlocked=false;
+  openJournalWithPin();
+});
+
+$('#lockJournalBtn').on('click', function(){
+  _jpinUnlocked = false;
+  document.getElementById('jpinOverlay').style.display = 'flex';
+  _jpinBuffer='';
+  _jpinMode='verify';
+  document.getElementById('jpinTitle').textContent='請輸入 PIN 碼';
+  _updatePinDots();
+  document.getElementById('jpinErr').textContent='';
+});
+
+/* ── Init form collapsible (jQuery handler, not global fn) ──────── */
+$(document).on('click', '#toggleInitFormBtn', function(){
+  const el = document.getElementById('initFormCollapse');
+  const arrow = document.getElementById('initArrow');
+  if (!el) return;
+  const open = el.classList.toggle('open');
+  if (arrow) arrow.textContent = open ? '▴' : '▾';
+});
+
+/* ── Price update button (both aliases) ───────────────────────── */
+function doUpdatePrices(btn) {
+  const holdings = _jnl.positions().filter(function(p){ return p.shares>0; });
+  if(!holdings.length){ alert('尚無持倉'); return; }
+  const ids = holdings.map(function(p){ return p.sid; }).join(',');
+  const orig = btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<span class="spinner-ring" style="width:10px;height:10px;border-width:2px;"></span>';
+  $.get('/api/stock_prices?ids='+ids, function(res){
+    btn.disabled=false; btn.innerHTML=orig;
+    if(!res.success) return;
+    Object.assign(_jnl.prices, res.data);
+    _jnl.savePrices();
+    renderAllJournal();
+  }).fail(function(){ btn.disabled=false; btn.innerHTML=orig; });
+}
+$(document).on('click','#updatePricesBtn,#updatePricesBtn2',function(){ doUpdatePrices(this); });
+
 /* ── Sidebar & Page Navigation ────────────────────────────────── */
 function toggleSidebar(force) {
   const open = force !== undefined ? force : !document.body.classList.contains('sb-open');
@@ -2098,7 +2319,7 @@ function navigateTo(pageId) {
   // Resize charts if returning to home
   if (pageId === 'home') setTimeout(function(){ try{Plotly.Plots.resize('vixRiverChart');}catch(e){} },100);
   if (pageId === 'calendar') $('#cal-date').val(new Date(Date.now()-90*864e5).toISOString().slice(0,10));
-  if (pageId === 'journal') renderAllJournal();
+  if (pageId === 'journal') openJournalWithPin();
 }
 $(document).on('click', '.sb-item', function(){ navigateTo($(this).data('page')); });
 $(document).on('click', '.page-back-btn', function(){ navigateTo($(this).data('page')||'home'); });
@@ -2162,26 +2383,65 @@ function renderJournalPage() {
   const posEl = document.getElementById('jpage-positions');
   if (posEl) {
     if (!holdings.length) {
-      posEl.innerHTML = '<div style="color:#7a85a3;text-align:center;padding:1rem;">暫無持倉 — 請先「初始化持倉」或「新增交易」</div>';
+      posEl.innerHTML = '<div style="color:#7a85a3;text-align:center;padding:1rem;">暫無持倉 — 請先點「設定初始持倉」</div>';
+      const banner = document.getElementById('jtotal-banner');
+      if (banner) banner.style.display='none';
     } else {
       const TH = 'style="padding:.4rem .5rem;color:#7a85a3;font-weight:600;text-align:left;font-size:.7rem;border-bottom:1px solid rgba(255,255,255,0.1);"';
+      let totalCostSum=0, totalMktSum=0, hasPrices=false;
+      const rows = holdings.map(function(p) {
+        const avg = p.shares > 0 ? p.cost / p.shares : 0;
+        const rlzColor = p.realized>0?'#5cd98a':p.realized<0?'#ff5f5f':'#7a85a3';
+        const priceInfo = _jnl.prices[p.sid];
+        const cp = priceInfo && priceInfo.price;
+        let plCell='—', pctCell='—', plColor='#7a85a3', cpDisplay=(p.cost/1000).toFixed(1)+'K';
+        if (cp && p.shares>0) {
+          hasPrices=true;
+          const mktVal=cp*p.shares, unreal=mktVal-p.cost, pct=p.cost>0?(unreal/p.cost*100):0;
+          plColor=unreal>=0?'#ff5f5f':'#5cd98a'; // 台灣慣例：紅漲綠跌
+          plCell=(unreal>=0?'+':'')+((unreal/1000).toFixed(2))+'K';
+          pctCell=(pct>=0?'+':'')+pct.toFixed(2)+'%';
+          cpDisplay='$'+cp.toLocaleString('en-US');
+          totalCostSum+=p.cost; totalMktSum+=mktVal;
+        } else { totalCostSum+=p.cost; }
+        const sig = typeof _signalMap!=='undefined' ? _signalMap[p.sid] : null;
+        const sigBadge = sig
+          ? '<span style="font-size:.6rem;font-weight:700;padding:.1rem .45rem;border-radius:8px;background:'+sig.color+'25;border:1px solid '+sig.color+'60;color:'+sig.color+';white-space:nowrap;margin-left:.35rem;">'+sig.name+'</span>'
+          : '';
+        const TD='style="padding:.45rem .5rem;border-bottom:1px solid rgba(255,255,255,0.06);color:#c8ccde;font-size:.75rem;"';
+        return '<tr>'
+          +'<td '+TD+' style="font-family:\'Space Mono\',monospace;color:#34d4c0;font-weight:700;">'+p.sid+'</td>'
+          +'<td '+TD+'>'+p.name+sigBadge+'</td>'
+          +'<td '+TD+' style="text-align:right;">'+p.shares.toLocaleString()+'</td>'
+          +'<td '+TD+' style="text-align:right;font-family:\'Space Mono\',monospace;">'+avg.toFixed(2)+'</td>'
+          +'<td '+TD+' style="text-align:right;">'+cpDisplay+'</td>'
+          +'<td '+TD+' style="text-align:right;color:'+plColor+';font-weight:700;">'+plCell+'</td>'
+          +'<td '+TD+' style="text-align:right;color:'+plColor+';font-weight:700;">'+pctCell+'</td>'
+          +'<td '+TD+' style="text-align:right;color:'+rlzColor+';font-size:.68rem;">'+
+            (p.realized!==0?(p.realized>0?'+':'')+((p.realized/1000).toFixed(2))+'K':'—')+'</td>'
+          +'</tr>';
+      });
       posEl.innerHTML = '<table style="width:100%;border-collapse:collapse;"><thead><tr>'
-        +'<th '+TH+'>代號</th><th '+TH+'>名稱</th><th '+TH+' style="text-align:right;">持股</th>'
-        +'<th '+TH+' style="text-align:right;">均成本</th><th '+TH+' style="text-align:right;">投入</th>'
+        +'<th '+TH+'>代號</th><th '+TH+'>名稱 / 景氣</th><th '+TH+' style="text-align:right;">持股</th>'
+        +'<th '+TH+' style="text-align:right;">均成本</th><th '+TH+' style="text-align:right;">現價/投入</th>'
+        +'<th '+TH+' style="text-align:right;">未實現損益</th><th '+TH+' style="text-align:right;">報酬%</th>'
         +'<th '+TH+' style="text-align:right;">已實現</th>'
-        +'</tr></thead><tbody>'
-        + holdings.map(p => {
-          const avg = (p.cost/p.shares).toFixed(2);
-          const totalK = (p.cost/1000).toFixed(1);
-          const rlzK = (p.realized/1000).toFixed(2);
-          const rlzColor = p.realized>0?'#5cd98a':p.realized<0?'#ff5f5f':'#7a85a3';
-          const TD = 'style="padding:.45rem .5rem;border-bottom:1px solid rgba(255,255,255,0.06);color:#c8ccde;font-size:.76rem;"';
-          return `<tr><td ${TD} style="font-family:'Space Mono',monospace;color:#34d4c0;font-weight:700;">${p.sid}</td>
-            <td ${TD}>${p.name}</td><td ${TD} style="text-align:right;">${p.shares.toLocaleString()}</td>
-            <td ${TD} style="text-align:right;">${avg}</td><td ${TD} style="text-align:right;">${totalK}K</td>
-            <td ${TD} style="text-align:right;color:${rlzColor};font-weight:700;">${p.realized!==0?(p.realized>0?'+':'')+rlzK+'K':'—'}</td></tr>`;
-        }).join('')
-        + '</tbody></table>';
+        +'</tr></thead><tbody>'+rows.join('')+'</tbody></table>';
+      // Update total banner
+      const banner = document.getElementById('jtotal-banner');
+      if (banner && hasPrices) {
+        const totalUnreal=totalMktSum-totalCostSum, totalPct=totalCostSum>0?(totalUnreal/totalCostSum*100):0;
+        const pnlCol=totalUnreal>=0?'#ff5f5f':'#5cd98a'; // 台灣慣例
+        banner.style.display='grid';
+        document.getElementById('jtot-cost').textContent='$'+(totalCostSum/1000).toFixed(1)+'K';
+        document.getElementById('jtot-mktval').textContent='$'+(totalMktSum/1000).toFixed(1)+'K';
+        const pe=document.getElementById('jtot-pnl');
+        pe.textContent=(totalUnreal>=0?'+':'')+((totalUnreal/1000).toFixed(2))+'K';
+        pe.style.color=pnlCol;
+        const pte=document.getElementById('jtot-pct');
+        pte.textContent=(totalPct>=0?'+':'')+totalPct.toFixed(2)+'%';
+        pte.style.color=pnlCol;
+      } else if (banner) banner.style.display='none';
     }
   }
   // Full-page history
@@ -2457,15 +2717,11 @@ $('#calSearchBtn').on('click', function(){
     $('#cal-chart-sub').text('共 '+sliced.length+' 個交易日');
     $('#cal-chart-area').show();
     renderStockCombined('calChartContainer',sliced,null,'#5ab4ff');
-    // Mark the start date with a vertical line
+    // Apply zone analysis after chart renders
     if(sliced.length){
       setTimeout(function(){
-        const shapes=[{type:'line',xref:'x',yref:'paper',x0:date,x1:date,y0:0,y1:1,
-          line:{color:'rgba(255,200,80,0.7)',width:2,dash:'dash'}}];
-        const anns=[{x:date,y:1.04,xref:'x',yref:'paper',text:'📌 '+date,
-          showarrow:false,font:{color:'#ffc947',size:9},xanchor:'center'}];
-        Plotly.relayout('calChartContainer',{shapes,annotations:anns});
-      },200);
+        applyZoneAnalysis('calChartContainer', sliced, date);
+      }, 300);
     }
   });
 });
@@ -2618,6 +2874,315 @@ $(document).on('click', function(e){
     $('#indicatorTooltip').hide();
   }
 });
+
+/* ── Calendar: Zone Analysis + Risk Parameter ─────────────────── */
+
+// Compute ATR14 array
+function computeATR14(kd) {
+  const atrs = [];
+  for (let i = 0; i < kd.length; i++) {
+    const tr = i === 0 ? kd[i].h - kd[i].l
+      : Math.max(kd[i].h - kd[i].l, Math.abs(kd[i].h - kd[i-1].c), Math.abs(kd[i].l - kd[i-1].c));
+    atrs.push(tr);
+  }
+  // Smooth with 14-period EMA-like
+  const atr14 = [];
+  let cur = atrs.slice(0,14).reduce((a,b)=>a+b,0)/14;
+  atr14.push(cur);
+  for (let i = 14; i < atrs.length; i++) { cur = (cur * 13 + atrs[i]) / 14; atr14.push(cur); }
+  return atr14;
+}
+
+// Compute volume MA20
+function computeVolMA(kd) {
+  return kd.map(function(_, i) {
+    if (i < 19) return null;
+    return kd.slice(i-19, i+1).reduce(function(s,d){ return s+(d.v||0); }, 0) / 20;
+  });
+}
+
+// Classify each day's zone
+function classifyDay(d, atr, volMA) {
+  let score = 0;
+  // Trend (0–40)
+  if (d.ma5 && d.ma10 && d.ma5 > d.ma10) score += 10;
+  if (d.ma10 && d.ma20 && d.ma10 > d.ma20) score += 10;
+  if (d.ma20 && d.ma60 && d.ma20 > d.ma60) score += 10;
+  if (d.hist && d.hist > 0) score += 5;
+  if (d.macd && d.signal && d.macd > d.signal) score += 5;
+  // Momentum (0–30)
+  if (d.k != null && d.d != null && d.k > d.d) score += 10;
+  if (d.k != null && d.k > 45 && d.k < 80) score += 10;
+  else if (d.k != null && d.k >= 80) score += 2; // overbought penalty
+  if (d.hist && d.hist > 0) score += 10;
+  // Position vs MA (0–20)
+  if (d.ma20 && d.c > d.ma20) score += 10;
+  if (d.ma60 && d.c > d.ma60) score += 10;
+  // Volume (0–10)
+  if (volMA && d.v && d.v > volMA * 1.2) score += 10;
+
+  if (score >= 62) return 'bull';
+  if (score >= 38) return 'neutral';
+  return 'bear';
+}
+
+// Compute risk % for a given day
+function computeRiskPct(d, atr14val) {
+  if (!d.c || d.c === 0) return 10;
+  const atrPct = (atr14val / d.c) * 100;
+  let base = atrPct * 1.8; // ~1.8×ATR stop loss
+
+  // Trend factor
+  let tf = 1.0;
+  const maBull = (d.ma5&&d.ma10&&d.ma5>d.ma10?1:0) + (d.ma10&&d.ma20&&d.ma10>d.ma20?1:0) + (d.ma20&&d.ma60&&d.ma20>d.ma60?1:0);
+  if (maBull === 3) tf = 0.72; // 強多頭排列 → 低風險
+  else if (maBull === 2) tf = 0.88;
+  else if (maBull === 1) tf = 1.10;
+  else tf = 1.40; // 空頭排列 → 高風險
+
+  // Momentum factor
+  let mf = 1.0;
+  if (d.k != null) {
+    if (d.k > 80) mf = 1.38; // 超買
+    else if (d.k < 20) mf = 0.88; // 超賣反彈機會
+    else if (d.k > 50 && d.hist > 0) mf = 0.82; // 多頭強勢
+  }
+  // MACD factor
+  if (d.hist && d.hist < 0 && d.hist < (d.macd||0)*0.5) mf *= 1.2;
+
+  // Position factor (vs MAs)
+  let pf = 1.0;
+  if (d.ma20 && d.c < d.ma20 && d.ma60 && d.c < d.ma60) pf = 1.35; // 雙MA下方
+  else if (d.ma20 && d.c > d.ma20 && d.ma60 && d.c > d.ma60) pf = 0.78; // 雙MA上方
+
+  const riskPct = base * tf * mf * pf;
+  return Math.min(Math.max(riskPct, 1.5), 38);
+}
+
+// Detect technical reason at a zone transition
+function detectTransitionReason(curr, prev, volMA) {
+  const reasons = [];
+  if (!prev) return '起始分析點';
+
+  // Gap detection
+  if (curr.o > prev.c * 1.018) reasons.push('多方跳空缺口');
+  else if (curr.o < prev.c * 0.982) reasons.push('空方跳空缺口');
+
+  // Volume surge
+  if (volMA && curr.v > volMA * 1.8) reasons.push('爆大量攻擊');
+  else if (volMA && curr.v < volMA * 0.4) reasons.push('極度縮量');
+
+  // MACD crossover
+  if (prev.hist < 0 && curr.hist > 0) reasons.push('MACD 金叉翻多');
+  else if (prev.hist > 0 && curr.hist < 0) reasons.push('MACD 死叉轉空');
+
+  // KD crossover
+  if (prev.k != null && prev.k < prev.d && curr.k > curr.d) reasons.push('KD 黃金交叉');
+  else if (prev.k != null && prev.k > prev.d && curr.k < curr.d) reasons.push('KD 死亡交叉');
+
+  // MA crossovers
+  if (prev.c < prev.ma20 && curr.c > curr.ma20) reasons.push('突破 MA20 壓力');
+  else if (prev.c > prev.ma20 && curr.c < curr.ma20) reasons.push('跌破 MA20 支撐');
+  if (prev.c < prev.ma60 && curr.c > curr.ma60) reasons.push('站上 MA60 中期均線');
+
+  // Oversold bounce
+  if (prev.k != null && prev.k < 20 && curr.k > curr.d && curr.k > 20) reasons.push('KD 超賣區反彈');
+
+  // MA alignment change
+  if (curr.ma5 && curr.ma10 && curr.ma20) {
+    if (curr.ma5 > curr.ma10 && curr.ma10 > curr.ma20 &&
+        prev.ma5 && !(prev.ma5 > prev.ma10 && prev.ma10 > prev.ma20)) {
+      reasons.push('均線多頭排列確立');
+    }
+  }
+
+  if (reasons.length === 0) return '技術面多指標共同確認';
+  return reasons.slice(0, 2).join(' + ');
+}
+
+function applyZoneAnalysis(cid, kd, startDate) {
+  const el = document.getElementById(cid);
+  if (!el || !el._fullLayout) return;
+  const fl = el._fullLayout;
+  const kDom = fl.yaxis && fl.yaxis.domain ? fl.yaxis.domain : [0.5, 1.0];
+
+  const atrArr = computeATR14(kd);
+  const volMA = computeVolMA(kd);
+  const allDates = kd.map(function(d){ return d.date; });
+
+  // Classify each day
+  const zones = kd.map(function(d, i) {
+    const atrVal = i < 14 ? atrArr[0] : atrArr[i - 14];
+    return {
+      date: d.date,
+      zone: classifyDay(d, atrVal, volMA[i]),
+      risk: computeRiskPct(d, atrVal || (d.h - d.l) || 1),
+    };
+  });
+
+  // Group consecutive same-zone periods
+  const groups = [];
+  let cur = null;
+  zones.forEach(function(z) {
+    if (!cur || cur.zone !== z.zone) {
+      if (cur) groups.push(cur);
+      cur = { zone: z.zone, start: z.date, end: z.date, risks: [z.risk], dates: [z.date] };
+    } else {
+      cur.end = z.date;
+      cur.risks.push(z.risk);
+      cur.dates.push(z.date);
+    }
+  });
+  if (cur) groups.push(cur);
+
+  // Build shapes and annotations
+  const shapes = [];
+  const anns = [];
+  const ZONE_FILL = {
+    bull:    'rgba(220,70,50,0.13)',   // 台灣紅=多方
+    neutral: 'rgba(200,160,30,0.09)',
+    bear:    'rgba(50,120,240,0.13)',  // 台灣藍=空方
+  };
+  const ZONE_TC = { bull:'#ff8060', neutral:'#ffd060', bear:'#70b8ff' };
+  const ZONE_LABELS = { bull:'多方格局', neutral:'盤整觀察', bear:'空方格局' };
+  const hoverTraces = [];
+
+  // Find largest group per zone type → only that group gets the zone label
+  const largestByType = {};
+  groups.forEach(function(g) {
+    if (!largestByType[g.zone] || g.dates.length > largestByType[g.zone].dates.length) {
+      largestByType[g.zone] = g;
+    }
+  });
+
+  groups.forEach(function(g, gi) {
+    const avgRisk = g.risks.reduce(function(a,b){return a+b;},0)/g.risks.length;
+    const si = allDates.indexOf(g.start);
+    const ei = allDates.indexOf(g.end);
+    // Use numeric index ±0.5 so adjacent zones are perfectly contiguous (no gap)
+    const x0 = si - 0.5;
+    const x1 = ei + 0.5;
+
+    shapes.push({
+      type:'rect', xref:'x', yref:'paper',
+      x0, x1,
+      y0:kDom[0], y1:kDom[1],
+      fillcolor:ZONE_FILL[g.zone],
+      line:{width:0},   // no border → eliminates thin-line artifacts
+      layer:'below'
+    });
+
+    // Zone transition: dashed separator + triangle hover marker
+    if (gi > 0) {
+      const prevDay = si > 0 ? kd[si-1] : null;
+      const currDay = kd[si];
+      const reason = detectTransitionReason(currDay, prevDay, volMA[si]);
+      // Dashed divider at boundary (between zones)
+      shapes.push({type:'line',xref:'x',yref:'paper',
+        x0: si - 0.5, x1: si - 0.5, y0:kDom[0], y1:kDom[1],
+        line:{color:'rgba(255,255,255,0.18)',width:1,dash:'dot'}
+      });
+      // Triangle hover marker at top of K-line panel
+      const priceAtTransition = currDay ? currDay.h : null;
+      if (priceAtTransition) {
+        const RISK_LEVEL = avgRisk<6?'低風險 🟢':avgRisk<12?'中度風險 🟡':avgRisk<20?'高風險 🟠':'極高風險 🔴';
+        hoverTraces.push({
+          type:'scatter', mode:'markers', showlegend:false, name:'',
+          x:[g.start], y:[priceAtTransition * 1.006],
+          marker:{symbol:'triangle-down', size:9, color:ZONE_TC[g.zone], opacity:0.85,
+                  line:{color:'rgba(255,255,255,0.5)',width:1}},
+          yaxis:'y',
+          hovertemplate:
+            '<b style="color:'+ZONE_TC[g.zone]+'">▶ '+ZONE_LABELS[g.zone]+'</b><br>'
+            +'%{x}  →  '+g.end+'（'+g.dates.length+'日）<br>'
+            +'<b>轉折原因：</b>'+reason+'<br>'
+            +'<b>區間風險：</b>'+avgRisk.toFixed(1)+'%  '+RISK_LEVEL
+            +'<extra></extra>',
+        });
+      }
+    }
+
+    // Zone label: only on the largest group of each type
+    if (largestByType[g.zone] === g && g.dates.length >= 3) {
+      const midIdx = Math.round((si + ei) / 2);
+      const midDate = kd[midIdx] ? kd[midIdx].date : g.start;
+      anns.push({
+        xref:'x', yref:'paper',
+        x: midDate,
+        y: kDom[1] - 0.018,
+        text: ZONE_LABELS[g.zone],
+        showarrow: false,
+        font: {color: ZONE_TC[g.zone], size: 9, family:"'Space Mono',monospace"},
+        xanchor: 'center', yanchor: 'top',
+        bgcolor: 'rgba(4,6,20,0.45)', borderpad: 3,
+      });
+    }
+  });
+
+  // Start date marker
+  shapes.push({type:'line',xref:'x',yref:'paper',
+    x0:startDate,x1:startDate,y0:0,y1:1,
+    line:{color:'rgba(255,200,80,0.65)',width:1.5,dash:'dash'}});
+  anns.push({xref:'x',yref:'paper',x:startDate,y:1.03,
+    text:'▼ 起點',showarrow:false,
+    font:{color:'#ffc947',size:8},xanchor:'center'});
+
+  Plotly.relayout(cid, {shapes, annotations:anns});
+  if (hoverTraces.length) Plotly.addTraces(cid, hoverTraces);
+
+  // Risk summary table below chart
+  renderRiskSummary(groups, kd, zones);
+}
+
+function renderRiskSummary(groups, kd, zones) {
+  const el = document.getElementById('cal-risk-summary');
+  if (!el) return;
+  const ZONE_TC = { bull:'#ff6060', neutral:'#ffd040', bear:'#5ab4ff' };
+  const ZONE_LABELS = { bull:'多方格局', neutral:'盤整觀察', bear:'空方格局' };
+  const RISK_LABELS = [
+    {max:6,  col:'#5cd98a', label:'低風險'},
+    {max:12, col:'#ffc947', label:'中度風險'},
+    {max:20, col:'#ff8c42', label:'高風險'},
+    {max:999,col:'#ff5f5f', label:'極高風險'},
+  ];
+  function riskLevel(r) {
+    return RISK_LABELS.find(function(x){return r<=x.max;}) || RISK_LABELS[3];
+  }
+  let html = '<div style="font-size:.68rem;font-weight:700;color:#7a85a3;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.65rem;">📊 區間風險分析</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;">';
+  groups.forEach(function(g, gi) {
+    const avgRisk = g.risks.reduce(function(a,b){return a+b;},0)/g.risks.length;
+    const rl = riskLevel(avgRisk);
+    const zc = ZONE_TC[g.zone];
+    const days = g.dates.length;
+    html += '<div style="background:rgba(255,255,255,0.04);border:1px solid '+zc+'40;border-radius:10px;padding:.65rem .8rem;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem;">'
+      +'<span style="font-size:.72rem;font-weight:700;color:'+zc+';">'+ZONE_LABELS[g.zone]+'</span>'
+      +'<span style="font-size:.65rem;color:'+rl.col+';font-weight:700;border:1px solid '+rl.col+'60;border-radius:6px;padding:.06rem .4rem;">'+rl.label+'</span>'
+      +'</div>'
+      +'<div style="font-size:.62rem;color:#7a85a3;margin-bottom:.25rem;">'+g.start+' → '+g.end+' ('+days+'日)</div>'
+      +'<div style="display:flex;align-items:baseline;gap:.4rem;">'
+      +'<span style="font-family:\'Space Mono\',monospace;font-size:1.2rem;font-weight:700;color:'+rl.col+';">'+avgRisk.toFixed(1)+'%</span>'
+      +'<span style="font-size:.62rem;color:#5a6480;">估計風險</span>'
+      +'</div>'
+      +'<div style="margin-top:.35rem;height:4px;border-radius:4px;background:rgba(255,255,255,0.08);">'
+      +'<div style="height:100%;border-radius:4px;background:'+rl.col+';width:'+Math.min(avgRisk/38*100,100).toFixed(0)+'%;"></div>'
+      +'</div>'
+      +'</div>';
+  });
+  html += '</div>';
+  // Overall risk metrics
+  const allRisks = zones.map(function(z){return z.risk;});
+  const avgAll = allRisks.reduce(function(a,b){return a+b;},0)/allRisks.length;
+  const maxAll = Math.max.apply(null, allRisks);
+  html += '<div style="margin-top:.75rem;font-size:.68rem;color:#5a6480;">'
+    +'<b style="color:#9aaac8;">⚠ 風險聲明：</b>'
+    +'風險參數基於 ATR 停損估算（1.8×ATR）× 趨勢/動能/位置修正因子，代表區間進場的預期最大不利移動幅度。'
+    +'整體均值：<b style="color:#ffc947;">'+avgAll.toFixed(1)+'%</b>　峰值：<b style="color:#ff5f5f;">'+maxAll.toFixed(1)+'%</b>　'
+    +'僅供技術分析參考，非投資建議。</div>';
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
 
 /* ── Signal detection helpers ─────────────────────────────────── */
 function _volMA20(kd) {

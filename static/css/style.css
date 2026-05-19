@@ -46,7 +46,7 @@ body::before {
     linear-gradient(180deg, #07091a 0%, #0b0e2a 100%);
 }
 
-main, nav, footer { position:relative; z-index:1; }
+main, nav, footer, .app-page { position:relative; z-index:1; }
 
 /* ── Glass mixin ───────────────────────────────────────────────── */
 .glass {
