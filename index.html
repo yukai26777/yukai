@@ -1,0 +1,15 @@
+<script>
+$(document).ready(function() {
+    $.get('/api/dashboard', function(response) {
+        if (response.success && response.data) {
+            const d = response.data;
+            if (d.twii) $('#dashTWII').text(d.twii.price.toLocaleString());
+            if (d.dji)  $('#dashDJI').text(d.dji.price.toLocaleString());
+            if (d.spx)  $('#dashSPX').text(d.spx.price.toLocaleString());
+            if (d.ixic) $('#dashIXIC').text(d.ixic.price.toLocaleString());
+            if (d.vix)  $('#dashVIX').text(d.vix);
+            if (d.usdtwd) $('#dashUSDTWD').text(d.usdtwd.rate);
+        }
+    });
+});
+</script>
