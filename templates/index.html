@@ -1445,8 +1445,7 @@ function renderStockCombined(cid, kd, instData, accent) {
     xaxis:{type:'category', gridcolor:'rgba(255,255,255,0.04)', tickangle:-45, nticks:10,
            rangeslider:{visible:false}, linecolor:'rgba(255,255,255,0.07)',
            automargin:false,
-           showspikes:true, spikemode:'across', spikedash:'dot',
-           spikecolor:'#253555', spikethickness:1},
+           showspikes:false},
     yaxis: {domain:kDom, gridcolor:'rgba(255,255,255,0.045)',
             showspikes:false,
             tickfont:{color:'rgba(200,204,222,0.7)'}},
@@ -1475,14 +1474,111 @@ function renderStockCombined(cid, kd, instData, accent) {
     _baseAnnotations = anns.slice();
     _baseTraceCount = allTraces.length;
     _signalsAnnotated = false;
-    // Update annotation button state
     const btn = document.getElementById('showSignalsBtn');
     if (btn) {
       btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>標記技術訊號';
       btn.classList.remove('active');
     }
+    // 初始化個股圖準線
+    setTimeout(function(){ _initCrosshair(cid); }, 300);
   }
 }
+
+/* ── 通用準線 + Y軸反白標籤（水平線卡在K棒close）──────────── */
+function _initCrosshair(gdId) {
+  var gd = document.getElementById(gdId);
+  if (!gd || !gd._fullLayout) return;
+
+  var ovId = '_CH_' + gdId;
+  var old = gd.querySelector('#' + ovId);
+  if (old) old.remove();
+
+  gd.style.position = 'relative';
+  var ov = document.createElement('div');
+  ov.id = ovId;
+  ov.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:5;';
+  gd.appendChild(ov);
+
+  // 垂直線（跟著鼠標 x）
+  var vl = document.createElement('div');
+  vl.style.cssText = 'position:absolute;width:0;border-left:1px solid rgba(160,185,230,0.55);display:none;';
+  ov.appendChild(vl);
+
+  // 水平線（卡在 K 棒 close 的 y 位置）
+  var hl = document.createElement('div');
+  hl.style.cssText = 'position:absolute;height:0;border-top:1px solid rgba(160,185,230,0.4);display:none;';
+  ov.appendChild(hl);
+
+  // Y 軸反白標籤
+  var yLbl = document.createElement('div');
+  yLbl.style.cssText = [
+    'position:absolute','background:#c8d0e8','color:#06091c',
+    'font-size:10px','font-weight:700',"font-family:'Space Mono',monospace",
+    'padding:1px 5px','border-radius:2px','white-space:nowrap',
+    'transform:translateY(-50%)','display:none','z-index:6'
+  ].join(';');
+  ov.appendChild(yLbl);
+
+  var _closeY = null, _closeVal = null;
+
+  // 從 plotly_hover 抓 candlestick close → 轉換為 y 像素
+  gd.on('plotly_hover', function(data) {
+    if (!data || !data.points) return;
+    var pt = data.points.find(function(p){ return p.data && p.data.type==='candlestick'; });
+    if (!pt) return;
+    var close = pt.close;
+    if (close == null) return;
+    var fl = gd._fullLayout;
+    var ya = fl && fl.yaxis;
+    if (!ya || !ya._offset || !ya._length) return;
+    var pT2 = ya._offset, pB2 = ya._offset + ya._length;
+    var rMin = ya.range[0], rMax = ya.range[1];
+    _closeY  = pT2 + (rMax - close) / (rMax - rMin) * (pB2 - pT2);
+    _closeVal = close;
+  });
+  gd.on('plotly_unhover', function() {
+    _closeY = null; _closeVal = null;
+    hl.style.display = yLbl.style.display = 'none';
+  });
+
+  function onMove(e) {
+    var fl = gd._fullLayout;
+    if (!fl) return;
+    var ya  = fl.yaxis;
+    if (!ya || !ya._offset) return;
+    var ml  = fl.margin;
+    var r   = gd.getBoundingClientRect();
+    var x   = e.clientX - r.left;
+    var y   = e.clientY - r.top;
+    var pL  = ml.l, pR = r.width - ml.r;
+    var pT  = ya._offset, pB = ya._offset + ya._length;
+
+    // 垂直線：跟著鼠標 x，高度限制在 K 線面板內
+    if (x < pL || x > pR || y < pT || y > pB) {
+      vl.style.display = hl.style.display = yLbl.style.display = 'none';
+      return;
+    }
+    vl.style.left = x + 'px'; vl.style.top = pT + 'px';
+    vl.style.height = (pB - pT) + 'px'; vl.style.display = 'block';
+
+    // 水平線和 y 標籤：卡在 K 棒 close 的 y 像素
+    if (_closeY != null && _closeY >= pT && _closeY <= pB) {
+      hl.style.top = _closeY + 'px'; hl.style.left = pL + 'px';
+      hl.style.width = (pR - pL) + 'px'; hl.style.display = 'block';
+      yLbl.textContent = Math.round(_closeVal).toLocaleString();
+      yLbl.style.display = 'block';
+      yLbl.style.top  = _closeY + 'px';
+      yLbl.style.left = (pL - yLbl.offsetWidth - 2) + 'px';
+    }
+  }
+
+  gd.addEventListener('mousemove', onMove);
+  gd.addEventListener('mouseleave', function() {
+    vl.style.display = hl.style.display = yLbl.style.display = 'none';
+  });
+}
+// 舊名稱兼容
+function _initCalCrosshair() { _initCrosshair('calChartKline'); }
 
 /* ── 回測日曆專用：三個獨立圖表 ─────────────────────────────── */
 function renderCalChartSplit(kd, accent) {
@@ -1510,13 +1606,13 @@ function renderCalChartSplit(kd, accent) {
     [candle,maLine(kd,'ma5','#ffc947'),maLine(kd,'ma10','#5ab4ff'),
      maLine(kd,'ma20',accent||'#34d4c0'),maLine(kd,'ma60','#d080ff')],
     {...BG,font:FONT,margin:{t:6,r:14,b:44,l:62},
-     xaxis:{...XBASE,tickangle:-45,nticks:10,automargin:true,
-            showspikes:true,spikemode:'across',spikedash:'dot',
-            spikecolor:'#253555',spikethickness:1},
+     xaxis:{...XBASE,tickangle:-45,nticks:10,automargin:true,showspikes:false},
      yaxis:{gridcolor:'rgba(255,255,255,0.045)',showspikes:false},
      showlegend:false,hovermode:'x unified',
      hoverlabel:{bgcolor:'rgba(8,11,30,0.92)',bordercolor:'rgba(255,255,255,0.18)',
-                 font:{color:'#f0f2ff',size:11}}},OPT);
+                 font:{color:'#f0f2ff',size:11}}},OPT).then(function(){
+    _initCalCrosshair();
+  });
 
   // ── MACD ──────────────────────────────────────────────────────
   if(kd.some(d=>d.macd!=null)){
