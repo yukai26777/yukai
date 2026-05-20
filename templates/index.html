@@ -440,6 +440,11 @@
       100% { box-shadow:inset 0 0 0 0 rgba(255,160,0,0); }
     }
     .chart-scanning { animation:chart-pulse .9s ease-out; }
+  @keyframes zonePopIn {
+    from { opacity:0; transform:scale(0.88) translateY(6px); }
+    to   { opacity:1; transform:scale(1)    translateY(0);   }
+  }
+  #zone-popup { animation: zonePopIn 0.18s cubic-bezier(.34,1.3,.64,1); }
   </style>
 </head>
 <body>
@@ -962,7 +967,8 @@
         <span style="font-size:.62rem;color:#3a4260;">│ 移到色塊查格局原因 · 點擊 K 棒查 OHLCV</span>
       </div>
       <!-- Risk Summary -->
-      <div id="cal-risk-summary" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;margin-top:1rem;"></div>
+      <!-- Zone 點擊彈窗 -->
+      <div id="zone-popup" style="display:none;position:fixed;z-index:9999;min-width:240px;max-width:320px;background:rgba(8,11,30,0.97);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:1rem 1.2rem;box-shadow:0 8px 32px rgba(0,0,0,0.6);pointer-events:auto;"></div>
     </div>
     <div id="cal-placeholder" style="text-align:center;padding:4rem;color:#4a5270;">
       <i class="bi bi-calendar3" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:#3a4260;"></i>
@@ -1315,19 +1321,22 @@ function renderKline(cid, kd, accent) {
 /* ── Combined K-line + 三大法人 + MACD + KD ─────────────────── */
 function renderStockCombined(cid, kd, instData, accent) {
   Plotly.purge(cid);
-  if (!kd || !kd.length) { document.getElementById(cid).innerHTML = '<div style="text-align:center;padding:3rem;color:#7a85a3;">暫無資料</div>'; return; }
+  // 清掉 spinner 等非 Plotly 元素（Plotly.purge 不清 innerHTML）
+  const _gdEl = document.getElementById(cid);
+  if (_gdEl) _gdEl.innerHTML = '';
+  if (!kd || !kd.length) { _gdEl.innerHTML = '<div style="text-align:center;padding:3rem;color:#7a85a3;">暫無資料</div>'; return; }
 
   const INST_COLORS = {'外資':'#5ab4ff','投信':'#5cd98a','自營商':'#d080ff'};
   const hasInst = instData && instData.dates && instData.dates.length > 0;
   const hasMacd = kd.some(d => d.macd != null);
   const hasKd   = kd.some(d => d.k != null);
 
-  // Panel domains — 面板之間保留 7% gap，確保視覺完全分離
+  // Panel domains — gap 加大確保 x 軸日期不被面板遮住（K線底部到MACD頂部留 12%）
   let kDom, instDom, macdDom, kdDom;
   if (hasMacd && hasKd && hasInst) {
-    kDom=[0.52,1.0]; macdDom=[0.35,0.47]; kdDom=[0.20,0.31]; instDom=[0.03,0.15];
+    kDom=[0.62,1.0]; macdDom=[0.40,0.53]; kdDom=[0.24,0.35]; instDom=[0.05,0.18];
   } else if (hasMacd && hasKd) {
-    kDom=[0.54,1.0]; macdDom=[0.29,0.47]; kdDom=[0.04,0.22];
+    kDom=[0.60,1.0]; macdDom=[0.30,0.50]; kdDom=[0.04,0.23];
   } else if (hasInst) {
     kDom=[0.38,1.0]; instDom=[0.0,0.32];
   } else {
@@ -1422,15 +1431,19 @@ function renderStockCombined(cid, kd, instData, accent) {
   if(hasInst&&instDom) addDiv(instDom[1], kdDom ? kdDom[0] : macdDom ? macdDom[0] : kDom[0], '三大法人', '#5ab4ff');
 
   // Per-panel inline legends (left side of each panel)
-  const LX = 0.012;
+  // 圖例：水平排列在各面板頂部中央，不壓到數據線
   const addLeg=(items, panelTop)=>{
+    const step = Math.min(0.13, 0.7 / Math.max(items.length, 1));
+    const startX = 0.5 - (items.length - 1) * step / 2;
     items.forEach(([lbl,color,dash], i)=>{
       const sym = dash==='dot' ? '╌' : dash==='bar' ? '▌' : '─';
-      anns.push({xref:'paper',yref:'paper', x:LX, y:panelTop-0.038-i*0.026,
+      anns.push({xref:'paper',yref:'paper',
+        x: startX + i * step, y: panelTop - 0.012,
         text:`<b style="color:${color}">${sym}</b> ${lbl}`,
         showarrow:false,
-        font:{color:'rgba(200,204,222,0.8)', size:8.5, family:"'Space Mono',monospace"},
-        xanchor:'left', yanchor:'top'});
+        font:{color:'rgba(200,204,222,0.85)', size:8.5, family:"'Space Mono',monospace"},
+        xanchor:'center', yanchor:'top',
+        bgcolor:'rgba(4,6,20,0.65)', borderpad:2});
     });
   };
   addLeg([['MA5','#ffc947',''],['MA10','#5ab4ff',''],['MA20',accent||'#34d4c0',''],['MA60','#d080ff','']], kDom[1]);
@@ -1441,7 +1454,7 @@ function renderStockCombined(cid, kd, instData, accent) {
   const layout = {
     paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
     font:{color:'#c8ccde', family:"'Space Mono',monospace", size:10},
-    margin:{t:16, r:16, b:65, l:68},
+    margin:{t:16, r:16, b:80, l:68},
     xaxis:{type:'category', gridcolor:'rgba(255,255,255,0.04)', tickangle:-45, nticks:10,
            rangeslider:{visible:false}, linecolor:'rgba(255,255,255,0.07)',
            automargin:false,
@@ -1521,20 +1534,17 @@ function _initCrosshair(gdId) {
 
   var _closeY = null, _closeVal = null;
 
-  // 從 plotly_hover 抓 candlestick close → 轉換為 y 像素
+  // plotly_hover：抓 candlestick 的 close，用 ya.l2p 精確換算 y 像素
   gd.on('plotly_hover', function(data) {
     if (!data || !data.points) return;
     var pt = data.points.find(function(p){ return p.data && p.data.type==='candlestick'; });
-    if (!pt) return;
-    var close = pt.close;
-    if (close == null) return;
+    if (!pt || pt.close == null) return;
     var fl = gd._fullLayout;
     var ya = fl && fl.yaxis;
-    if (!ya || !ya._offset || !ya._length) return;
-    var pT2 = ya._offset, pB2 = ya._offset + ya._length;
-    var rMin = ya.range[0], rMax = ya.range[1];
-    _closeY  = pT2 + (rMax - close) / (rMax - rMin) * (pB2 - pT2);
-    _closeVal = close;
+    if (!ya || !ya.l2p || ya._offset == null) return;
+    // l2p 把 data value → 相對 plot area 的 y 像素（向下為正）
+    _closeY   = ya._offset + ya.l2p(pt.close);
+    _closeVal = pt.close;
   });
   gd.on('plotly_unhover', function() {
     _closeY = null; _closeVal = null;
@@ -1979,6 +1989,10 @@ function openStockModal(sid){
       $('#fs-pbr').text(d.pbr!=null?d.pbr:'—');
       $('#fs-yield').text(d.dividend_yield!=null?d.dividend_yield+'%':'—');
       _instDataCache=d.institutional||null;
+      // 三大法人到了，若 K 線已渲染就更新加入三大法人
+      if(_currentKdata&&_instDataCache){
+        renderStockCombined('stockChartContainer',_currentKdata,_instDataCache,'#34d4c0');
+      }
 
       // Revenue chart
       if(d.revenue&&d.revenue.length){
@@ -1995,10 +2009,8 @@ function openStockModal(sid){
     klineProm.done(function(res){
       if(res.success&&res.k_data&&res.k_data.length){
         _currentKdata = res.k_data;
-        // When K-line arrives, try to render with whatever inst data we have
-        fundProm.always(function(){
-          renderStockCombined('stockChartContainer',res.k_data,_instDataCache,'#34d4c0');
-        });
+        // K 線到了馬上顯示（不等三大法人），有三大法人再更新一次
+        renderStockCombined('stockChartContainer',res.k_data,_instDataCache,'#34d4c0');
       } else {
         $('#stockChartContainer').html('<div style="text-align:center;padding:3rem;color:#7a85a3;">暫無資料</div>');
       }
@@ -3280,6 +3292,7 @@ function applyZoneAnalysis(cid, kd, startDate) {
     const reason = gi > 0
       ? detectTransitionReason(currDay, prevDay, volMA[si])
       : '起始分析點';
+    g._reason = reason;  // 存入 group，讓 _showZonePopup 可取用
     const RISK_LEVEL = avgRisk<6?'低風險 🟢':avgRisk<12?'中度風險 🟡':avgRisk<20?'高風險 🟠':'極高風險 🔴';
 
     // Zone background rect
@@ -3332,16 +3345,19 @@ function applyZoneAnalysis(cid, kd, startDate) {
     }
   });
 
-  // 起點標示：只在 K 線面板（kDom 範圍），黃色細虛線
+  // 計算起點：若 startDate 是非交易日（週末/節假日），對齊到下一個交易日
+  var startIdx2 = kd.findIndex(function(d){ return d.date >= startDate; });
+  var actualStart = startIdx2 >= 0 ? kd[startIdx2].date : startDate;
+
+  // 起點標示：使用 actualStart（確保是 sliced 中真實存在的日期）
   shapes.push({type:'line',xref:'x',yref:'paper',
-    x0:startDate,x1:startDate,y0:kDom[0],y1:kDom[1],
+    x0:actualStart,x1:actualStart,y0:kDom[0],y1:kDom[1],
     line:{color:'#ffc947',width:0.8,dash:'dash'}});
-  anns.push({xref:'x',yref:'paper',x:startDate,y:kDom[1]+0.03,
+  anns.push({xref:'x',yref:'paper',x:actualStart,y:kDom[1]+0.03,
     text:'▼ 起點',showarrow:false,
     font:{color:'#ffc947',size:8},xanchor:'center'});
 
-  // 計算起點視圖範圍（1/3 定位）
-  var startIdx2 = kd.findIndex(function(d){ return d.date >= startDate; });
+  // 計算視圖範圍（讓起點在左側 1/3）
   var viewStart = -0.5, viewEnd = kd.length - 0.5;
   if (startIdx2 >= 0) {
     var afterLen2 = kd.length - startIdx2;
@@ -3349,27 +3365,36 @@ function applyZoneAnalysis(cid, kd, startDate) {
     viewStart = Math.max(-0.5, startIdx2 - pre2 - 0.5);
   }
 
-  // 合并 shapes/annotations
+  // 合并 shapes/annotations，同時鎖定 xaxis.range（防止 addTraces 觸發 autorange 覆蓋）
   var prevShapes = (el.layout && el.layout.shapes) ? el.layout.shapes.slice() : [];
   var prevAnns   = (el.layout && el.layout.annotations) ? el.layout.annotations.slice() : [];
   Plotly.relayout(cid, {
     shapes: prevShapes.concat(shapes),
     annotations: prevAnns.concat(anns),
     hovermode: 'x unified',
+    'xaxis.autorange': false,
+    'xaxis.range': [viewStart, viewEnd],
   });
 
-  // addTraces：zone invisible scatters（點擊用）
-  if (hoverTraces.length) Plotly.addTraces(cid, hoverTraces);
+  // addTraces 後再次鎖定 range（addTraces 可能重觸發 autorange）
+  if (hoverTraces.length) {
+    Plotly.addTraces(cid, hoverTraces).then(function() {
+      Plotly.relayout(cid, {'xaxis.autorange':false,'xaxis.range':[viewStart,viewEnd]});
+    });
+  } else {
+    // 無 hoverTraces 也要確保 range 鎖定
+    Plotly.relayout(cid, {'xaxis.autorange':false,'xaxis.range':[viewStart,viewEnd]});
+  }
 
-  // 點擊事件：K棒 → OHLCV；色塊區間 → 原因＋風險
+  // K棒點擊 → 下方 info bar
   var calEl = document.getElementById(cid);
   calEl.removeAllListeners && calEl.removeAllListeners('plotly_click');
   calEl.on('plotly_click', function(clickData) {
     if (!clickData || !clickData.points || !clickData.points.length) return;
-    var info = document.getElementById('cal-kbar-info');
-    if (!info) return;
     var pt = clickData.points[0];
     if (pt.data && pt.data.type === 'candlestick') {
+      var info = document.getElementById('cal-kbar-info');
+      if (!info) return;
       var row = kd.find(function(d){return d.date===pt.x;});
       var chgColor = pt.close >= pt.open ? '#5cd98a' : '#ff5f5f';
       var chgPct = ((pt.close - pt.open) / pt.open * 100).toFixed(2);
@@ -3380,22 +3405,178 @@ function applyZoneAnalysis(cid, kd, startDate) {
         +'收 <b style="color:'+chgColor+'">'+pt.close.toFixed(0)+'</b>'
         +' <span style="color:'+chgColor+';">('+chgPct+'%)</span>'
         +(row&&row.v ? '　量 <b style="color:#a0b0d0;">'+Math.round(row.v/1000)+'K</b>' : '');
-    } else if (pt.data && pt.data.name === 'zone' && pt.customdata) {
-      var cd = pt.customdata;
-      var zc = {bull:'#ff8060',neutral:'#ffd060',bear:'#70b8ff'}[cd.zone]||'#c8ccde';
-      info.innerHTML =
-        '<b style="color:'+zc+'">'+cd.label+'</b>　'
-        +cd.start+' → '+cd.end+'（'+cd.days+'日）<br>'
-        +'<b>歸類原因：</b>'+cd.reason+'　'
-        +'<b>平均風險：</b><span style="color:'+(cd.risk<6?'#5cd98a':cd.risk<12?'#ffc947':cd.risk<20?'#ff8c42':'#ff5f5f')+'">'+cd.risk.toFixed(1)+'%</span>　'+cd.riskLevel;
-    } else { return; }
-    info.style.display = 'block';
-    clearTimeout(info._timer);
-    info._timer = setTimeout(function(){info.style.display='none';}, 6000);
+      info.style.display = 'block';
+      clearTimeout(info._timer);
+      info._timer = setTimeout(function(){info.style.display='none';}, 5000);
+    }
   });
 
-  // Risk summary table below chart
-  renderRiskSummary(groups, kd, zones);
+  // 色塊高亮 + 點擊彈窗
+  _initZoneHighlights(cid, groups, kd);
+}
+
+/* ── 色塊高亮疊層 + 點擊彈窗 ─────────────────────────────────── */
+function _initZoneHighlights(cid, groups, kd) {
+  var gd = document.getElementById(cid);
+  if (!gd || !gd._fullLayout) return;
+  var fl = gd._fullLayout;
+  var ml = fl.margin;
+  var ya = fl.yaxis;
+  if (!ya || ya._offset == null) return;
+
+  var oldOv = gd.querySelector('#_zoneHL');
+  if (oldOv) oldOv.remove();
+
+  gd.style.position = 'relative';
+  var ov = document.createElement('div');
+  ov.id = '_zoneHL';
+  ov.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:4;';
+  gd.appendChild(ov);
+
+  var ZONE_HL = {bull:'rgba(255,120,80,0.26)',neutral:'rgba(255,210,60,0.22)',bear:'rgba(80,160,255,0.26)'};
+  var ZONE_TC = {bull:'#ff8060',neutral:'#ffd060',bear:'#70b8ff'};
+  var ZONE_LABELS = {bull:'多方格局',neutral:'盤整觀察',bear:'空方格局'};
+  var allDates = kd.map(function(d){ return d.date; });
+  var hlItems = [];
+
+  // 用 category 軸線性插值算 x 像素（不依賴 xa.l2p，更穩定）
+  var n = kd.length;
+  var plotW = fl.width - ml.l - ml.r;  // plot area 寬度
+
+  groups.forEach(function(g) {
+    var si = allDates.indexOf(g.start);
+    var ei = allDates.indexOf(g.end);
+    // category i 的中心 = ml.l + (i + 0.5) / n * plotW
+    // zone 從 si-0.5 到 ei+0.5（含邊界半格）
+    var xMin = ml.l + (si / n) * plotW;
+    var xMax = ml.l + ((ei + 1) / n) * plotW;
+    var y0 = ya._offset, yh = ya._length;
+
+    var hl = document.createElement('div');
+    hl.style.cssText = [
+      'position:absolute','left:'+xMin+'px','width:'+(xMax-xMin)+'px',
+      'top:'+y0+'px','height:'+yh+'px','background:'+ZONE_HL[g.zone],
+      'opacity:0','transition:opacity 0.1s ease',
+      'pointer-events:auto',  // 接受 click
+      'cursor:pointer','border-radius:2px'
+    ].join(';');
+    ov.appendChild(hl);
+
+    // 點擊色塊 → 彈窗（直接在 hl 上監聽，最可靠）
+    (function(grp){ hl.addEventListener('click', function(e) {
+      _showZonePopup(grp, ZONE_TC, ZONE_LABELS, e);
+    }); })(g);
+
+    hlItems.push({el:hl, group:g, xMin:xMin, xMax:xMax, yMin:y0, yMax:y0+yh});
+  });
+
+  // mousemove 控制高亮（事件在 hl 上觸發後 bubble up 到 gd）
+  gd.addEventListener('mousemove', function(e) {
+    var r = gd.getBoundingClientRect();
+    var mx = e.clientX - r.left, my = e.clientY - r.top;
+    hlItems.forEach(function(item) {
+      var inside = mx>=item.xMin && mx<=item.xMax && my>=item.yMin && my<=item.yMax;
+      item.el.style.opacity = inside ? '1' : '0';
+    });
+  });
+  gd.addEventListener('mouseleave', function() {
+    hlItems.forEach(function(item){ item.el.style.opacity = '0'; });
+  });
+
+  // K棒 click → OHLCV（plotly_click 只在 candlestick 觸發）
+  // 如果點 K棒，關掉 zone popup，改顯示 OHLCV
+  gd.removeAllListeners && gd.removeAllListeners('plotly_click');
+  gd.on('plotly_click', function(data) {
+    if (!data || !data.points || !data.points.length) return;
+    var pt = data.points[0];
+    if (pt.data && pt.data.type === 'candlestick') {
+      // 關掉可能已顯示的 zone popup
+      var zp = document.getElementById('zone-popup');
+      if (zp) zp.style.display = 'none';
+      var info = document.getElementById('cal-kbar-info');
+      if (!info) return;
+      var row = kd.find(function(d){return d.date===pt.x;});
+      var cc = pt.close>=pt.open?'#5cd98a':'#ff5f5f';
+      var cp = ((pt.close-pt.open)/pt.open*100).toFixed(2);
+      info.innerHTML = '📅 <b style="color:#ffc947;">'+pt.x+'</b>　'
+        +'開 <b>'+pt.open.toFixed(0)+'</b>　高 <b>'+pt.high.toFixed(0)+'</b>　'
+        +'低 <b>'+pt.low.toFixed(0)+'</b>　收 <b style="color:'+cc+'">'+pt.close.toFixed(0)+'</b>'
+        +' <span style="color:'+cc+';">('+cp+'%)</span>'
+        +(row&&row.v?'　量 <b style="color:#a0b0d0;">'+Math.round(row.v/1000)+'K</b>':'');
+      info.style.display='block';
+      clearTimeout(info._timer);
+      info._timer=setTimeout(function(){info.style.display='none';},5000);
+    }
+  });
+}
+
+// 全局 handler，確保每次都能正確移除
+var _zonePopupCloseHandler = null;
+
+function _closeZonePopup() {
+  var popup = document.getElementById('zone-popup');
+  if (popup) popup.style.display = 'none';
+  if (_zonePopupCloseHandler) {
+    document.removeEventListener('click', _zonePopupCloseHandler);
+    _zonePopupCloseHandler = null;
+  }
+}
+
+function _showZonePopup(g, ZONE_TC, ZONE_LABELS, evt) {
+  // 先清除舊的 handler，防止殘留
+  if (_zonePopupCloseHandler) {
+    document.removeEventListener('click', _zonePopupCloseHandler);
+    _zonePopupCloseHandler = null;
+  }
+
+  var popup = document.getElementById('zone-popup');
+  if (!popup) return;
+  var zc = ZONE_TC[g.zone] || '#c8ccde';
+  var avgRisk = g.risks.reduce(function(a,b){return a+b;},0)/g.risks.length;
+  var rl = avgRisk<6?'低風險':avgRisk<12?'中度風險':avgRisk<20?'高風險':'極高風險';
+  var rlc = avgRisk<6?'#5cd98a':avgRisk<12?'#ffc947':avgRisk<20?'#ff8c42':'#ff5f5f';
+
+  popup.innerHTML = [
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.55rem;">',
+      '<div>',
+        '<b style="color:'+zc+';font-size:1rem;">'+ZONE_LABELS[g.zone]+'</b>',
+        '<div style="font-size:.63rem;color:#5a6480;margin-top:.1rem;">'+g.start+' → '+g.end+'（'+g.dates.length+'日）</div>',
+      '</div>',
+      '<button id="_zpClose" style="background:none;border:none;color:#7a85a3;cursor:pointer;font-size:1.1rem;line-height:1;padding:0 0 0 8px;flex-shrink:0;" title="關閉">✕</button>',
+    '</div>',
+    '<div style="font-size:.72rem;color:#a0aac8;margin-bottom:.55rem;line-height:1.6;">',
+      '<span style="color:#c8ccde;font-weight:700;">歸類原因</span><br>'+g._reason,
+    '</div>',
+    '<div style="display:flex;align-items:baseline;gap:.5rem;">',
+      '<span style="font-size:1.1rem;font-weight:700;font-family:\'Space Mono\',monospace;color:'+rlc+';">'+avgRisk.toFixed(1)+'%</span>',
+      '<span style="font-size:.68rem;color:'+rlc+';">'+rl+'</span>',
+    '</div>',
+  ].join('');
+
+  // 定位在鼠標附近
+  popup.style.display = 'block';
+  popup.style.animation = 'none';
+  popup.offsetHeight;
+  popup.style.animation = '';
+  var pw = popup.offsetWidth, ph = popup.offsetHeight;
+  var x = evt.clientX + 12, y = evt.clientY - ph / 2;
+  if (x + pw > window.innerWidth  - 10) x = evt.clientX - pw - 12;
+  if (y < 10) y = 10;
+  if (y + ph > window.innerHeight - 10) y = window.innerHeight - ph - 10;
+  popup.style.left = x + 'px';
+  popup.style.top  = y + 'px';
+
+  // 叉叉按鈕
+  var closeBtn = document.getElementById('_zpClose');
+  if (closeBtn) closeBtn.onclick = function(e){ e.stopPropagation(); _closeZonePopup(); };
+
+  // 50ms 後再掛 document click handler，讓本次 click 事件 bubble 完畢再監聽
+  setTimeout(function() {
+    _zonePopupCloseHandler = function(e) {
+      if (!popup.contains(e.target)) _closeZonePopup();
+    };
+    document.addEventListener('click', _zonePopupCloseHandler);
+  }, 60);
 }
 
 function renderRiskSummary(groups, kd, zones) {
