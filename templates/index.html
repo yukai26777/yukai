@@ -1492,13 +1492,13 @@ function renderStockCombined(cid, kd, instData, accent) {
       btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>標記技術訊號';
       btn.classList.remove('active');
     }
-    // 初始化個股圖準線
-    setTimeout(function(){ _initCrosshair(cid); }, 300);
+    // 初始化個股圖準線（傳入 kd 讓水平線從數組查 close，不依賴 plotly_hover）
+    setTimeout(function(){ _initCrosshair(cid, kd); }, 300);
   }
 }
 
 /* ── 通用準線 + Y軸反白標籤（水平線卡在K棒close）──────────── */
-function _initCrosshair(gdId) {
+function _initCrosshair(gdId, kdRef) {
   var gd = document.getElementById(gdId);
   if (!gd || !gd._fullLayout) return;
 
@@ -1532,38 +1532,20 @@ function _initCrosshair(gdId) {
   ].join(';');
   ov.appendChild(yLbl);
 
-  var _closeY = null, _closeVal = null;
-
-  // plotly_hover：抓 candlestick 的 close，用 ya.l2p 精確換算 y 像素
-  gd.on('plotly_hover', function(data) {
-    if (!data || !data.points) return;
-    var pt = data.points.find(function(p){ return p.data && p.data.type==='candlestick'; });
-    if (!pt || pt.close == null) return;
-    var fl = gd._fullLayout;
-    var ya = fl && fl.yaxis;
-    if (!ya || !ya.l2p || ya._offset == null) return;
-    // l2p 把 data value → 相對 plot area 的 y 像素（向下為正）
-    _closeY   = ya._offset + ya.l2p(pt.close);
-    _closeVal = pt.close;
-  });
-  gd.on('plotly_unhover', function() {
-    _closeY = null; _closeVal = null;
-    hl.style.display = yLbl.style.display = 'none';
-  });
-
   function onMove(e) {
     var fl = gd._fullLayout;
     if (!fl) return;
     var ya  = fl.yaxis;
-    if (!ya || !ya._offset) return;
+    if (!ya || ya._offset == null) return;
     var ml  = fl.margin;
     var r   = gd.getBoundingClientRect();
     var x   = e.clientX - r.left;
     var y   = e.clientY - r.top;
     var pL  = ml.l, pR = r.width - ml.r;
     var pT  = ya._offset, pB = ya._offset + ya._length;
+    var plotW = fl.width - ml.l - ml.r;
 
-    // 垂直線：跟著鼠標 x，高度限制在 K 線面板內
+    // 垂直線跟著鼠標 x
     if (x < pL || x > pR || y < pT || y > pB) {
       vl.style.display = hl.style.display = yLbl.style.display = 'none';
       return;
@@ -1571,14 +1553,22 @@ function _initCrosshair(gdId) {
     vl.style.left = x + 'px'; vl.style.top = pT + 'px';
     vl.style.height = (pB - pT) + 'px'; vl.style.display = 'block';
 
-    // 水平線和 y 標籤：卡在 K 棒 close 的 y 像素
-    if (_closeY != null && _closeY >= pT && _closeY <= pB) {
-      hl.style.top = _closeY + 'px'; hl.style.left = pL + 'px';
-      hl.style.width = (pR - pL) + 'px'; hl.style.display = 'block';
-      yLbl.textContent = Math.round(_closeVal).toLocaleString();
-      yLbl.style.display = 'block';
-      yLbl.style.top  = _closeY + 'px';
-      yLbl.style.left = (pL - yLbl.offsetWidth - 2) + 'px';
+    // 從 kd 查出鼠標對應的 K 棒 close（不依賴 plotly_hover，避免被 zone div 攔截）
+    if (kdRef && kdRef.length && ya.range) {
+      var n = kdRef.length;
+      var catIdx = Math.round((x - pL) / plotW * n - 0.5);
+      catIdx = Math.max(0, Math.min(n - 1, catIdx));
+      var closeVal = kdRef[catIdx].c;
+      var rMin = ya.range[0], rMax = ya.range[1];
+      var closeY = pT + (rMax - closeVal) / (rMax - rMin) * (pB - pT);
+      if (closeY >= pT && closeY <= pB) {
+        hl.style.top = closeY + 'px'; hl.style.left = pL + 'px';
+        hl.style.width = (pR - pL) + 'px'; hl.style.display = 'block';
+        yLbl.textContent = Math.round(closeVal).toLocaleString();
+        yLbl.style.display = 'block';
+        yLbl.style.top  = closeY + 'px';
+        yLbl.style.left = (pL - yLbl.offsetWidth - 2) + 'px';
+      }
     }
   }
 
@@ -1621,7 +1611,7 @@ function renderCalChartSplit(kd, accent) {
      showlegend:false,hovermode:'x unified',
      hoverlabel:{bgcolor:'rgba(8,11,30,0.92)',bordercolor:'rgba(255,255,255,0.18)',
                  font:{color:'#f0f2ff',size:11}}},OPT).then(function(){
-    _initCalCrosshair();
+    _initCrosshair('calChartKline', kd);
   });
 
   // ── MACD ──────────────────────────────────────────────────────
